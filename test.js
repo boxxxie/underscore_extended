@@ -1,11 +1,6 @@
 var _ = require("./underscore");
 require("./underscore_extended");
 
-var pprint = require('util');
-function log(obj){
-    console.log(pprint.inspect(obj,true,42));
-}
-
 function _test(fnName){
     return function(){
 	var input = arguments;
