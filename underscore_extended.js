@@ -195,13 +195,6 @@ _.mixin({
 	    peek:function(arr,index){
 		return arr[index];
 	    }});
-
-_.mixin({
-	    groupBy_F:function(iterator){
-		return function(list){
-		    return _.groupBy(list,iterator);
-		};
-	    }});
 _.mixin({
 	    //fn({a:1,b:2,c:3},['a','b'],'field') -> {field:{a:1,b:2},c:3}
 	    nest:function(obj,selectedKeysList,newFieldName){
@@ -258,7 +251,10 @@ _.mixin({
 	    //_.filter$({a:1,b:2},function(val,key){return key == 'a'}) -> {a: 1}
 	    //_.filter$([1,2],function(val){return val == 1}) -> [1]
 	    filter$:function(obj,iterator){
-		if(_.isObject(obj)){
+		if(_.isArray(obj)){
+		    return _.filter(obj,iterator);
+		}
+		else if(_.isObject(obj)){
 		    function iteratorWrapper(value, index, list){
 			//in this case the value would look like ['a',1]
 			//index would look like 0
@@ -272,9 +268,6 @@ _.mixin({
 			.toObject()
 			.value();
 		}
-		else if(_.isArray(obj)){
-		    return _.filter(obj,iterator);
-		}
 		else{
 		    return obj;
 		}
@@ -285,11 +278,11 @@ _.mixin({
 	    //_.map$({a:1,b:2},function(val,key){return [key,val] }) -> {a:1,b:2}
 	    // _.map$([{a:1},{b:2}],function(val,key){return val }) -> [{a:1},{b:2}]
 	    map$:function(obj,iterator){
-		if(_.isObject(obj)){
-		    return _(_.map(obj,iterator)).toObject();
-		}
-		else if(_.isArray(obj)){
+		if(_.isArray(obj)){
 		    return _.map(obj,iterator);
+		}
+		else if(_.isObject(obj)){
+		    return _(_.map(obj,iterator)).toObject();
 		}
 		else{
 		    return obj;
