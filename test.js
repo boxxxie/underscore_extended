@@ -82,6 +82,14 @@ removeKeys({"a":1,"b":2},['b'])
 ({a:1})
 ("remove a key from a simple object");
 
+removeKeys({"a":1,"b":2,c:[1,2,3]},['b'])
+({a:1,c:[1,2,3]})
+("remove a key from a complex object");
+
+removeKeys({"a":1,"b":2,c:[1,2,3]},['c'])
+({a:1,b:2})
+("remove a key from a complex object");
+
 removeKeys({"a":1,"b":2},['c'])
 ({a:1,b:2})
 ("remove a key from a simple object that doesn't have the key");

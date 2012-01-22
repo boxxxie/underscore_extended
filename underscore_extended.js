@@ -245,11 +245,6 @@ _.mixin({
 	    }});
 
 _.mixin({
-	    isObject:function(obj){
-		return typeof(obj) === 'object' && !_.isArray(obj);
-	    }});
-
-_.mixin({
 	    log:function(logText){
 		return function(obj){
 		    console.log(logText);
