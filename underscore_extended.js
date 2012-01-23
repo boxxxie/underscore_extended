@@ -45,7 +45,8 @@ _.mixin({
 	    /*create an object without the keys in the selected keys array arg
 	     * ({a:'a',b:'b'},['a']) -> {b:'b'}
 	     */
-	    removeKeys:function (obj,keys){
+	    removeKeys:function (obj){
+		var keys = _.flatten(_.rest(arguments)); //do flatten because of older array notation, in which we can get an array in an array.
 		return _.filter$(obj,function(val,key){return !_.contains(keys,key);});
 	    }});
 
@@ -87,11 +88,17 @@ _.mixin({isNotEmpty:function (obj){
 
 
 _.mixin({renameKeys:function (toEdit,fieldMap){
+	     function transformArrayIntoFieldMap(arr){
+		 return _.chain(arr).flatten().partition(2).toObject().value();
+	     }
 	     if(_.isArray(fieldMap)){
-		 var fMap = _.chain(fieldMap).flatten().partition(2).toObject(fieldMap).value();
+		 var fMap = transformArrayIntoFieldMap(fieldMap);
+	     }
+	     else if (_.isObject(fieldMap)){
+		 var fMap = fieldMap;
 	     }
 	     else{
-		 var fMap = fieldMap;
+		 var fMap = transformArrayIntoFieldMap(_.rest(arguments));
 	     }
 	     return _.map$(toEdit,function(val,key){
 			       if(_.isDefined(fMap[key])){

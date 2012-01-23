@@ -6,7 +6,7 @@ function _test(fnName){
 	var input = arguments;
 	return function(output){
 	    return function(testText){
-		var result = _[fnName].apply(this,input);
+		var result = _[fnName].apply(null,input);
 		if(_.isEqual(result,output)){
 		    console.log("Passed: " + fnName + ": " + testText);
 		}
@@ -93,6 +93,26 @@ removeKeys({"a":1,"b":2,c:[1,2,3]},['c'])
 removeKeys({"a":1,"b":2},['c'])
 ({a:1,b:2})
 ("remove a key from a simple object that doesn't have the key");
+ //----------- different syntax
+removeKeys({"a":1,"b":2},'b')
+({a:1})
+("remove a key from a simple object");
+
+removeKeys({"a":1,"b":2,c:[1,2,3]},'b')
+({a:1,c:[1,2,3]})
+("remove a key from a complex object");
+
+removeKeys({"a":1,"b":2,c:[1,2,3]},'c')
+({a:1,b:2})
+("remove a key from a complex object");
+
+removeKeys({"a":1,"b":2},'c')
+({a:1,b:2})
+("remove a key from a simple object that doesn't have the key");
+
+removeKeys({"a":1,"b":2},'a','b')
+({})
+("remove all keys");
 
 var testEscapeStr = "\<>\/&''";
 unEscape(_.escape(testEscapeStr))
@@ -136,6 +156,10 @@ renameKeys({a:'b',c:'d'},{a:'c', c:'a'})
 ("swapping key names!");
 
 renameKeys({a:'b',c:'d'},['a','c','c','a'])
+({c:'b',a:'d'})
+("swapping key names! but with an array as the keymap input");
+
+renameKeys({a:'b',c:'d'},'a','c','c','a')
 ({c:'b',a:'d'})
 ("swapping key names! but with an array as the keymap input");
 
