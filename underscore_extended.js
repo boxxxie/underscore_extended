@@ -314,3 +314,21 @@ _.mixin({
 		return _.reduce(list,compressor(filterFn),[]);
 	    }
 	});
+
+
+_.mixin({
+	    join:function(list,listToJoin,id){
+		var lists = list.concat(listToJoin);
+		var idsToJoinOn = _.chain(list).pluck(id).map(function(o){return o.toString();}).value();
+		//console.log(idsToJoinOn);
+		return _.chain(lists)
+		    .groupBy(id)
+		    .filter(function(val,key){
+				 //console.log([val,key]);
+				 return _.contains(idsToJoinOn,key);	 
+			     })
+		    .mapMerge()
+		    .flatten()
+		    .value();
+	    }
+	});
