@@ -41,7 +41,9 @@ nest = _test("nest"),
 filter$ = _test("filter$"),
 map$ = _test("map$"),
 compress = _test("compress"),
-join = _test("join");
+join = _test("join"),
+replace = _test("replace"),
+matchTo = _test("matchTo");
 
 pairs({a:'a',b:'b'})
 ([['a','a'],['b','b']])
@@ -264,5 +266,44 @@ join([{id:1,a:2}],[{id:1,a:1},{id:2,a:3}],'id')
 join([{id:1,a:2},{id:2,a:1}],[{id:1,a:1},{id:2,a:3}],'id')
 ([{id:1,a:1},{id:2,a:3}])
 ("joining two lists on 'id' field, 2 match and replace");
+
+//--------------------------------------------
+/*
+replace([{id:2}],[{id:1,a:2}],'id')
+([])
+("replacing two lists on 'id' field, no match");
+
+replace([{id:1}],[{id:1,a:2}],'id')
+([{id:1,a:2}])
+("replacing two lists on 'id' field, match");
+
+replace([{id:1,a:1}],[{id:1,a:2}],'id')
+([{id:1,a:2}])
+("replacing two lists on 'id' field, match and replace");
+
+replace([{id:1,a:2}],[{id:1,a:1}],'id')
+([{id:1,a:1}])
+("joining two lists on 'id' field, match and replace");
+
+replace([{id:1,a:2},{id:3,a:3}],[{id:1,a:1},{id:2,a:3}],'id')
+([{id:1,a:1}])
+("joining two lists on 'id' field, match and replace, and miss match");
+
+replace([{id:1,a:2},{id:2,a:1}],[{id:1,a:1},{id:2,a:3}],'id')
+([{id:1,a:1},{id:2,a:3}])
+("joining two lists on 'id' field, 2 match and replace");
+*/
+
+matchTo([2],[{id:1,a:2}],'id')
+([])
+("matching number array to object array [1],[1], no matches");
+
+matchTo([1],[{id:1,a:2}],'id')
+([{id:1,a:2}])
+("matching number array to object array [1],[2], matches");
+
+matchTo(["1","2"],[{id:"1",a:2}],'id')
+([{id:"1",a:2}])
+("matching string array with obj array [2][1], matches");
 
 console.log("tests finished");

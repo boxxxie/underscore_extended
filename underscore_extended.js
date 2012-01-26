@@ -317,18 +317,25 @@ _.mixin({
 
 
 _.mixin({
-	    join:function(list,listToJoin,id){
+	    join:function(list,listToJoin,field){
 		var lists = list.concat(listToJoin);
-		var idsToJoinOn = _.chain(list).pluck(id).map(function(o){return o.toString();}).value();
-		//console.log(idsToJoinOn);
+		var fieldsToJoinOn = _.chain(list).pluck(field).map(function(o){return o.toString();}).value();
 		return _.chain(lists)
-		    .groupBy(id)
+		    .groupBy(field)
 		    .filter(function(val,key){
-				 //console.log([val,key]);
-				 return _.contains(idsToJoinOn,key);	 
+				 return _.contains(fieldsToJoinOn,key);	 
 			     })
 		    .mapMerge()
 		    .flatten()
 		    .value();
+	    }
+	});
+
+//like join, but works on a primative array and an obj array
+//not like join in that anything that isn't in both arrays is removed
+_.mixin({
+	    matchTo:function(primativeList,listToMatchOn,field){
+		var matchingFields = _.chain(listToMatchOn).pluck(field).intersection(primativeList).value();
+		return _.filter(listToMatchOn,function(item){return _.contains(matchingFields,item[field]);});
 	    }
 	});
