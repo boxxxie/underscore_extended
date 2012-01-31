@@ -1,4 +1,14 @@
 var _ = require("./underscore");
+
+_.mixin({
+	    /* Retrieve the keys and values of an object's properties.
+	     {a:'a',b:'b'} -> [[a,'a'],[b,'b']]
+	     */
+	    isObj:function (obj) {
+		return _.isObject(obj) && !_.isArray(obj);
+	    }
+	});
+
 _.mixin({
 	    /* Retrieve the keys and values of an object's properties.
 	     {a:'a',b:'b'} -> [[a,'a'],[b,'b']]
@@ -24,7 +34,8 @@ _.mixin({
 	    /*create an object with only the keys in the selected keys array arg
 	     * ({a:'a',b:'b'},['a']) -> {a:'a'}
 	     */
-	    selectKeys:function (obj,keys){
+	    selectKeys:function (obj){
+		var keys = _.flatten(_.rest(arguments)); //do flatten because of older array notation, in which we can get an array in an array.
 		return  _(obj).filter$(function(val,key){return _.contains(keys,key);});
 	    },
 	    selectKeys_F:function (keys){
@@ -87,40 +98,50 @@ _.mixin({isNotEmpty:function (obj){
 	});
 
 
-_.mixin({renameKeys:function (toEdit,fieldMap){
+_.mixin({renameKeys:function (toEdit){
+	     //TODO: extract this function for converting args into object
+	     var fieldMap = _.flatten(_.rest(arguments));
 	     function transformArrayIntoFieldMap(arr){
-		 return _.chain(arr).flatten().partition(2).toObject().value();
+		 return _.chain(arr).partition(2).toObject().value();
 	     }
-	     if(_.isArray(fieldMap)){
-		 var fMap = transformArrayIntoFieldMap(fieldMap);
+
+	     var mergedFields = _.merge(fieldMap);
+
+	     if(_.isObj(mergedFields)){
+		 var fMap = mergedFields;
 	     }
-	     else if (_.isObject(fieldMap)){
-		 var fMap = fieldMap;
+	     else if (_.isArray(mergedFields)){
+		 var fMap = transformArrayIntoFieldMap(mergedFields);
 	     }
 	     else{
-		 var fMap = transformArrayIntoFieldMap(_.rest(arguments));
+		 return toEdit;	 
 	     }
-	     return _.map$(toEdit,function(val,key){
+	     return _.map$(toEdit,
+			   function(val,key){
 			       if(_.isDefined(fMap[key])){
 				   return [fMap[key],val];
 			       }
 			       else return [key,val];
 			   });
 	 },
-	 renameKeys_F:function (fieldMap){
-	     return function(toEdit){
-		 return _.renameKeys(toEdit,fieldMap);
-	     };
-	 },
-	 mapRenameKeys:function (list,fieldMap){
-	     return _.map(list,_.renameKeys_F(fieldMap));    
+	 mapRenameKeys:function (list){
+	     var nameChanges = _.rest(arguments);
+	     return _.map(list,
+			  function(item){
+			      return _.renameKeys.apply(null,[item,nameChanges]);
+			  });    
 	 }
-});
+	});
 
 _.mixin({merge:function (objArray){
 	     //merges all of the objects in an array into one object
 	     //probably can be done via apply.extend([...])
-	     return _.reduce(objArray,function(sum,cur){return _.extend(sum,cur);},{});
+	     if(_.every(objArray,_.isObj)){
+		 return _.reduce(objArray,function(sum,cur){return _.extend(sum,cur);},{});
+	     }
+	     else{
+		 return objArray;
+	     }
 	 },
 	 mapMerge:function(lists){
 	     return _.map(lists,_.merge);
@@ -131,10 +152,13 @@ _.mixin({merge:function (objArray){
 	 }});
 
 _.mixin({extend_r:function (obj1,obj2){
-	     //recursive extend
+	     var isObject = function(obj) {
+		 return obj === Object(obj);
+	     };
 	     function mergeRecursive(obj1, obj2) {
 		 for (var p in obj2) {
-		     if (_.isObject(obj2[p])) {
+		     if (isObject(obj2[p])) {
+			 obj1[p] = {};
 			 obj1[p] = mergeRecursive(obj1[p], obj2[p]);
 		     } else {
 			 obj1[p] = obj2[p];
@@ -148,7 +172,7 @@ _.mixin({extend_r:function (obj1,obj2){
 
 
 
-//TODO: add walk to lib, or make an underscore_walk lib
+//FIXME: remove this (at least the walk part)
 _.mixin({
 	    /*applies a function over the values of an object*/
 	    applyToValues:function(obj,fn,recursive){
@@ -337,5 +361,14 @@ _.mixin({
 	    matchTo:function(primativeList,listToMatchOn,field){
 		var matchingFields = _.chain(listToMatchOn).pluck(field).intersection(primativeList).value();
 		return _.filter(listToMatchOn,function(item){return _.contains(matchingFields,item[field]);});
+	    }
+	});
+
+
+_.mixin({
+	    has_F:function(field){
+		return function(obj){
+		    return _.has(obj,field);
+		};
 	    }
 	});

@@ -33,6 +33,7 @@ unEscape = _test("unEscape"),
 isNotEmpty = _test("isNotEmpty"),
 isLastEmpty = _test("isLastEmpty"),
 renameKeys = _test("renameKeys"),
+mapRenameKeys = _test("mapRenameKeys"),
 merge = _test("merge"),
 mapMerge = _test("mapMerge"),
 zipMerge = _test("zipMerge"),
@@ -43,7 +44,8 @@ map$ = _test("map$"),
 compress = _test("compress"),
 join = _test("join"),
 replace = _test("replace"),
-matchTo = _test("matchTo");
+matchTo = _test("matchTo"),
+extend_r = _test("extend_r");
 
 pairs({a:'a',b:'b'})
 ([['a','a'],['b','b']])
@@ -154,6 +156,18 @@ renameKeys({a:'b',c:'d'},{a:'ba'})
 ({ba:'b',c:'d'})
 ("rename keys in simple obj");
 
+renameKeys({a:'b',c:'d'},[{a:'ba'}])
+({ba:'b',c:'d'})
+("rename keys in simple obj, different args");
+
+renameKeys({a:'b',c:'d'},[{a:'ba'},{c:'na'}])
+({ba:'b',na:'d'})
+("rename keys in simple obj, different args");
+
+renameKeys({a:'b',c:'d'},{a:'ba'},{c:'na'})
+({ba:'b',na:'d'})
+("rename keys in simple obj, different args");
+
 renameKeys({a:'b',c:'d'},{a:'c', c:'a'})
 ({c:'b',a:'d'})
 ("swapping key names!");
@@ -170,6 +184,34 @@ renameKeys({a:'b',c:'d'},[['a','c'],['c','a']])
 ({c:'b',a:'d'})
 ("swapping key names! but with a pair array as the keymap input");
 
+//----------------------------------------------map rename
+
+mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],{a:'ba'})
+([{ba:'b',c:'d'},{ba:'b',c:'d'}])
+("rename keys in simple obj");
+
+mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],{a:'c', c:'a'})
+([{c:'b',a:'d'},{c:'b',a:'d'}])
+("swapping key names!");
+
+mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],['a','c','c','a'])
+([{c:'b',a:'d'},{c:'b',a:'d'}])
+("swapping key names! but with an array as the keymap input");
+
+mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],'a','c','c','a')
+([{c:'b',a:'d'},{c:'b',a:'d'}])
+("swapping key names! but with an array as the keymap input");
+
+mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],[['a','c'],['c','a']])
+([{c:'b',a:'d'},{c:'b',a:'d'}])
+("swapping key names! but with a pair array as the keymap input");
+
+mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],{'a':'c'},{'c':'a'})
+([{c:'b',a:'d'},{c:'b',a:'d'}])
+("swapping key names! but with a vargs objs as the keymap input");
+
+//--------------------------------------------------
+
 merge([{a:1},{a:2},{a:3}])
 ({a:3})
 ("all objs in array have same keys, last val is expected output");
@@ -177,6 +219,14 @@ merge([{a:1},{a:2},{a:3}])
 merge([{a:1},{b:2},{c:3}])
 ({a:1,b:2,c:3})
 ("all objs in array have have different keys");
+
+merge([1,2,3])
+([1,2,3])
+("arrays has things that aren't objects");
+
+merge([[1],[2],[3]])
+([[1],[2],[3]])
+("arrays has things that aren't objects");
 
 mapMerge([[{a:1},{b:2},{c:3}],[{a:1},{a:2},{a:3}]])
 ([{a:1,b:2,c:3},{a:3}])
@@ -267,33 +317,6 @@ join([{id:1,a:2},{id:2,a:1}],[{id:1,a:1},{id:2,a:3}],'id')
 ([{id:1,a:1},{id:2,a:3}])
 ("joining two lists on 'id' field, 2 match and replace");
 
-//--------------------------------------------
-/*
-replace([{id:2}],[{id:1,a:2}],'id')
-([])
-("replacing two lists on 'id' field, no match");
-
-replace([{id:1}],[{id:1,a:2}],'id')
-([{id:1,a:2}])
-("replacing two lists on 'id' field, match");
-
-replace([{id:1,a:1}],[{id:1,a:2}],'id')
-([{id:1,a:2}])
-("replacing two lists on 'id' field, match and replace");
-
-replace([{id:1,a:2}],[{id:1,a:1}],'id')
-([{id:1,a:1}])
-("joining two lists on 'id' field, match and replace");
-
-replace([{id:1,a:2},{id:3,a:3}],[{id:1,a:1},{id:2,a:3}],'id')
-([{id:1,a:1}])
-("joining two lists on 'id' field, match and replace, and miss match");
-
-replace([{id:1,a:2},{id:2,a:1}],[{id:1,a:1},{id:2,a:3}],'id')
-([{id:1,a:1},{id:2,a:3}])
-("joining two lists on 'id' field, 2 match and replace");
-*/
-
 matchTo([2],[{id:1,a:2}],'id')
 ([])
 ("matching number array to object array [1],[1], no matches");
@@ -305,5 +328,31 @@ matchTo([1],[{id:1,a:2}],'id')
 matchTo(["1","2"],[{id:"1",a:2}],'id')
 ([{id:"1",a:2}])
 ("matching string array with obj array [2][1], matches");
+
+//------------------ extend recursive -------------------
+
+extend_r({},{a:1})
+({a:1})
+("non-recursive extend onto an empty object");
+
+extend_r({},{a:{b:1}})
+({a:{b:1}})
+("recursive extend onto an empty objet");
+
+extend_r({a:1},{a:{b:1}})
+({a:{b:1}})
+("recursive extend onto a non-empty objet");
+
+extend_r({a:{b:0}},{a:{b:1}})
+({a:{b:1}})
+("recursive extend onto a non-empty objet");
+
+extend_r({a:{b:0},c:0},{a:{b:1}})
+({a:{b:1},c:0})
+("recursive extend onto a non-empty objet, leaving 1 field unchanged");
+
+extend_r({a:{b:0},c:0},{})
+({a:{b:0},c:0})
+("recursive extend onto a non-empty objet, with an empty object");
 
 console.log("tests finished");
