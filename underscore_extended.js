@@ -158,7 +158,7 @@ _.mixin({extend_r:function (obj1,obj2){
 	     function mergeRecursive(obj1, obj2) {
 		 for (var p in obj2) {
 		     if (isObject(obj2[p])) {
-			 obj1[p] = {};
+			 obj1[p] = {}; //this is to avoid merging properties that don't exist on obj1
 			 obj1[p] = mergeRecursive(obj1[p], obj2[p]);
 		     } else {
 			 obj1[p] = obj2[p];
@@ -167,6 +167,26 @@ _.mixin({extend_r:function (obj1,obj2){
 		 return obj1;
 	     }
 	     return mergeRecursive(obj1, obj2);
+	 }
+	});
+
+//i don't think this is any different than defaults. was made to be used in couchDB. it is recursive, which extend, and i believe defaults, is not.
+_.mixin({fill:function (fillIn,fillFrom){
+	     var isObject = function(obj) {
+		 return obj === Object(obj);
+	     };
+	     function mergeRecursive(fillIn, fillFrom) {
+		 for (var p in fillFrom) {
+		     if (isObject(fillFrom[p])) {
+			 fillIn[p] = mergeRecursive(fillIn[p], fillFrom[p]);
+		     } 
+		     else if(fillIn[p] === undefined){
+			 fillIn[p] = fillFrom[p];
+		     }
+		 }
+		 return fillIn;
+	     }
+	     return mergeRecursive(fillIn, fillFrom);
 	 }
 	});
 

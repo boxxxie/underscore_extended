@@ -45,7 +45,8 @@ compress = _test("compress"),
 join = _test("join"),
 replace = _test("replace"),
 matchTo = _test("matchTo"),
-extend_r = _test("extend_r");
+extend_r = _test("extend_r"),
+fill = _test("fill");
 
 pairs({a:'a',b:'b'})
 ([['a','a'],['b','b']])
@@ -354,5 +355,39 @@ extend_r({a:{b:0},c:0},{a:{b:1}})
 extend_r({a:{b:0},c:0},{})
 ({a:{b:0},c:0})
 ("recursive extend onto a non-empty objet, with an empty object");
+
+extend_r({c:0},{a:{b:1}})
+({a:{b:1},c:0})
+("recursive extend onto a non-empty objet, leaving 1 field unchanged and adding a new top-level field");
+
+//-----------------------fill -------------------------------
+
+fill({},{a:1})
+({a:1})
+("filling in an empty object with a simple object");
+
+fill({a:1},{a:2})
+({a:1})
+("simple objects that have property already, no fill");
+
+fill({a:1},{a:2,b:2})
+({a:1,b:2})
+("simple objects that have property already, but missing one. filled");
+
+fill({a:1},{a:2,b:2})
+({a:1,b:2})
+("simple objects that have property already, but missing one. filled");
+
+fill({a:{b:1}},{a:2,b:2})
+({a:{b:1}, b:2})
+("complex objects that have property already. no fill");
+
+fill({a:{b:1},b:3},{a:2,b:2})
+({a:{b:1}, b:3})
+("complex objects that have property already. no fill");
+
+fill({a:{b:1}},{a:{b:2,c:3}})
+({a:{b:1,c:3}})
+("complex objects that have property already. nested fill");
 
 console.log("tests finished");
