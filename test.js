@@ -360,6 +360,28 @@ extend_r({c:0},{a:{b:1}})
 ({a:{b:1},c:0})
 ("recursive extend onto a non-empty objet, leaving 1 field unchanged and adding a new top-level field");
 
+extend_r(
+    {_id: "02bb06f0fed1596decf2024a4c025997", 
+     _rev: "2-27c295b83271e6dcc2dc43df18444177", 
+     date: "Wed Jan 25 2012 22:24:01 GMT-0500 (EST)", 
+     price: {selling_price: 2}, 
+     description: "invNeww", 
+     upccode: "01123456"},
+    {_id: "02bb06f0fed1596decf2024a4c029a59", 
+     _rev: "5-484927d67a1be1454431b4143059c87c", 
+     date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)", 
+     description: "invNeww", 
+     apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true}, 
+     upccode: "01123456"})
+({_id: "02bb06f0fed1596decf2024a4c029a59", 
+  _rev: "5-484927d67a1be1454431b4143059c87c", 
+  date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)", 
+  description: "invNeww", 
+  price: {selling_price: 2},
+  apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true}, 
+  upccode: "01123456"})
+("complex real world object filling in a missing field");
+
 //-----------------------fill -------------------------------
 
 fill({},{a:1})
@@ -389,5 +411,28 @@ fill({a:{b:1},b:3},{a:2,b:2})
 fill({a:{b:1}},{a:{b:2,c:3}})
 ({a:{b:1,c:3}})
 ("complex objects that have property already. nested fill");
+
+
+fill(
+    {_id: "02bb06f0fed1596decf2024a4c029a59", 
+     _rev: "5-484927d67a1be1454431b4143059c87c", 
+     date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)", 
+     description: "invNeww", 
+     apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true}, 
+     upccode: "01123456"},
+    {_id: "02bb06f0fed1596decf2024a4c025997", 
+     _rev: "2-27c295b83271e6dcc2dc43df18444177", 
+     date: "Wed Jan 25 2012 22:24:01 GMT-0500 (EST)", 
+     price: {selling_price: 2}, 
+     description: "invNeww", 
+     upccode: "01123456"})
+({_id: "02bb06f0fed1596decf2024a4c029a59", 
+  _rev: "5-484927d67a1be1454431b4143059c87c", 
+  date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)", 
+  description: "invNeww",
+  price: {selling_price: 2},  
+  apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true}, 
+  upccode: "01123456"})
+("complex real world object filling in a missing field");
 
 console.log("tests finished");

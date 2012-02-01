@@ -151,43 +151,52 @@ _.mixin({merge:function (objArray){
                           function(zipped){return _.merge(zipped);});
 	 }});
 
-_.mixin({extend_r:function (obj1,obj2){
-	     var isObject = function(obj) {
-		 return obj === Object(obj);
-	     };
-	     function mergeRecursive(obj1, obj2) {
-		 for (var p in obj2) {
-		     if (isObject(obj2[p])) {
-			 obj1[p] = {}; //this is to avoid merging properties that don't exist on obj1
-			 obj1[p] = mergeRecursive(obj1[p], obj2[p]);
-		     } else {
-			 obj1[p] = obj2[p];
-		     }
-		 }
-		 return obj1;
-	     }
-	     return mergeRecursive(obj1, obj2);
-	 }
+//recursive _.extend
+//designed to work stand alone in couchdb
+_.mixin({
+	    extend_r:function(extendTo,extendFrom){
+		function isObject(obj) {
+		    return obj === Object(obj) && !(obj instanceof Array);
+		};
+		function mergeRecursive(extendTo, extendFrom) {
+		    for (var p in extendFrom) {
+			if (isObject(extendFrom[p])) {
+			    extendTo[p] = mergeRecursive({}, extendFrom[p]);
+			} else {
+			    extendTo[p] = extendFrom[p];
+			}
+		    }
+		    return extendTo;
+		}
+		return mergeRecursive(extendTo, extendFrom);
+	    }
 	});
 
-//i don't think this is any different than defaults. was made to be used in couchDB. it is recursive, which extend, and i believe defaults, is not.
-_.mixin({fill:function (fillIn,fillFrom){
-	     var isObject = function(obj) {
-		 return obj === Object(obj);
-	     };
-	     function mergeRecursive(fillIn, fillFrom) {
-		 for (var p in fillFrom) {
-		     if (isObject(fillFrom[p])) {
-			 fillIn[p] = mergeRecursive(fillIn[p], fillFrom[p]);
-		     } 
-		     else if(fillIn[p] === undefined){
-			 fillIn[p] = fillFrom[p];
-		     }
-		 }
-		 return fillIn;
-	     }
-	     return mergeRecursive(fillIn, fillFrom);
-	 }
+//recursive _.defaults
+//designed to work stand alone in couchdb
+_.mixin({
+	    fill:function(fillIn,fillFrom){
+		function isObject(obj) {
+		    return obj === Object(obj) && !(obj instanceof Array);
+		};
+		function mergeRecursive(fillIn, fillFrom) {
+		    for (var p in fillFrom) {
+			if (isObject(fillFrom[p])) {
+			    if(fillIn[p] === undefined){
+				fillIn[p] = mergeRecursive({}, fillFrom[p]);
+			    }
+			    else{
+				fillIn[p] = mergeRecursive(fillIn[p], fillFrom[p]);
+			    }
+			} 
+			else if(fillIn[p] === undefined){
+			    fillIn[p] = fillFrom[p];
+			}
+		    }
+		    return fillIn;
+		}
+		return mergeRecursive(fillIn, fillFrom);
+	    }
 	});
 
 
