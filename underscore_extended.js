@@ -1,4 +1,6 @@
-var _ = require("./underscore");
+if(!_){
+    var _ = require("./underscore");
+}
 
 _.mixin({
 	    /* Retrieve the keys and values of an object's properties.
