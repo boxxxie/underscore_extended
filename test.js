@@ -42,7 +42,7 @@ nest = _test("nest"),
 filter$ = _test("filter$"),
 map$ = _test("map$"),
 compress = _test("compress"),
-join = _test("join"),
+joinOn = _test("joinOn"),
 replace = _test("replace"),
 matchTo = _test("matchTo"),
 extend_r = _test("extend_r"),
@@ -299,23 +299,23 @@ compress([1,1,1,1,2,2,3,3,4,5],function(o1,o2){return o1==o2;})
 ("sorted list of integers using equal operator");
 
 
-join([{id:1,a:1}],[{id:2,a:2}],'id')
+joinOn([{id:1,a:1}],[{id:2,a:2}],'id')
 ([{id:1,a:1}])
 ("joining two lists on 'id' field, no matches");
 
-join([{id:1,a:1}],[{id:1,a:2}],'id')
+joinOn([{id:1,a:1}],[{id:1,a:2}],'id')
 ([{id:1,a:2}])
 ("joining two lists on 'id' field, match and replace");
 
-join([{id:1,a:2}],[{id:1,a:1}],'id')
+joinOn([{id:1,a:2}],[{id:1,a:1}],'id')
 ([{id:1,a:1}])
 ("joining two lists on 'id' field, match and replace");
 
-join([{id:1,a:2}],[{id:1,a:1},{id:2,a:3}],'id')
+joinOn([{id:1,a:2}],[{id:1,a:1},{id:2,a:3}],'id')
 ([{id:1,a:1}])
 ("joining two lists on 'id' field, match and replace, and miss match");
 
-join([{id:1,a:2},{id:2,a:1}],[{id:1,a:1},{id:2,a:3}],'id')
+joinOn([{id:1,a:2},{id:2,a:1}],[{id:1,a:1},{id:2,a:3}],'id')
 ([{id:1,a:1},{id:2,a:3}])
 ("joining two lists on 'id' field, 2 match and replace");
 

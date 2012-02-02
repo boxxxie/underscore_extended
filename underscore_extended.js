@@ -372,7 +372,7 @@ _.mixin({
 
 
 _.mixin({
-	    join:function(list,listToJoin,field){
+	    joinOn:function(list,listToJoin,field){
 		var lists = list.concat(listToJoin);
 		var fieldsToJoinOn = _.chain(list).pluck(field).map(function(o){return o.toString();}).value();
 		return _.chain(lists)
@@ -386,8 +386,8 @@ _.mixin({
 	    }
 	});
 
-//like join, but works on a primative array and an obj array
-//not like join in that anything that isn't in both arrays is removed
+//like joinOn, but works on a primative array and an obj array
+//not like joinOn in that anything that isn't in both arrays is removed
 _.mixin({
 	    matchTo:function(primativeList,listToMatchOn,field){
 		var matchingFields = _.chain(listToMatchOn).pluck(field).intersection(primativeList).value();
