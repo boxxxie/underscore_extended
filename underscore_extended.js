@@ -376,8 +376,8 @@ _.mixin({
 		return _.chain(lists)
 		    .groupBy(field)
 		    .filter(function(val,key){
-				 return _.contains(fieldsToJoinOn,key);	 
-			     })
+				return _.contains(fieldsToJoinOn,key);	 
+			    })
 		    .mapMerge()
 		    .flatten()
 		    .value();
@@ -399,5 +399,15 @@ _.mixin({
 		return function(obj){
 		    return _.has(obj,field);
 		};
+	    },
+	    filterHas:function(list,field){
+		return _.filter(list,_.has_F(field));
 	    }
 	});
+
+_.mixin({
+	    either:function(){
+		return _.chain(arguments).compact().first().value();
+	    }
+	});
+

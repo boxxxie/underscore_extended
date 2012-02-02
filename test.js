@@ -46,7 +46,8 @@ join = _test("join"),
 replace = _test("replace"),
 matchTo = _test("matchTo"),
 extend_r = _test("extend_r"),
-fill = _test("fill");
+fill = _test("fill"),
+either = _test("either");
 
 pairs({a:'a',b:'b'})
 ([['a','a'],['b','b']])
@@ -434,5 +435,24 @@ fill(
   apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true}, 
   upccode: "01123456"})
 ("complex real world object filling in a missing field");
+
+//--------------------------- either -------------------------
+
+either(undefined,undefined,null,0,1)
+(1)
+("simple list of false vals with the last one being the one returend");
+
+either()
+(undefined)
+("no args passed in");
+
+either(undefined, undefined)
+(undefined)
+("null args passed in");
+
+either(3, 1)
+(3)
+("non-false args passed in, return first");
+
 
 console.log("tests finished");
