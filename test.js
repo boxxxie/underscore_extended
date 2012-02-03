@@ -439,7 +439,7 @@ fill(
 //--------------------------- either -------------------------
 
 either(undefined,undefined,null,0,1)
-(1)
+(0)
 ("simple list of false vals with the last one being the one returend");
 
 either()
@@ -453,6 +453,7 @@ either(undefined, undefined)
 either(3, 1)
 (3)
 ("non-false args passed in, return first");
+
 
 
 console.log("tests finished");
