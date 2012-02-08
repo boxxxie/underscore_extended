@@ -1,11 +1,33 @@
-if(!_){
-    var _ = require("./underscore");
-}
+var _ = require("./underscore");
 
 _.mixin({
-	    /* Retrieve the keys and values of an object's properties.
-	     {a:'a',b:'b'} -> [[a,'a'],[b,'b']]
+	    /*
+	     * this is a generic helper function that will allow you to take any function that is applied to
+	     * an object, or an array of objects, and make a map out of it
+	     * examples below include mapCombine
+	     * examples of the uses of the map functions can be seen in the test.js file
 	     */
+	    mapVargFn:function(fn){
+		return function(list){
+		    if(_.size(arguments) === 1){
+			var arg = _.first(arguments);
+			return _.map(list,
+				     function(item){
+					 return fn(item,arg);
+				     });
+		    }
+		    else{
+			var args = _.chain(arguments).rest().toArray().value();
+			return _.map(list,
+				     function(item){
+					 return fn.apply(null,_.flatten([item,args]));
+				     });
+		    }
+		};
+	    }
+	});
+
+_.mixin({
 	    isObj:function (obj) {
 		return _.isObject(obj) && !_.isArray(obj);
 	    }
@@ -37,31 +59,20 @@ _.mixin({
 	     * ({a:'a',b:'b'},['a']) -> {a:'a'}
 	     */
 	    selectKeys:function (obj){
-		var keys = _.flatten(_.rest(arguments)); //do flatten because of older array notation, in which we can get an array in an array.
+		//do flatten because of older array notation, in which we can get an array in an array.
+		var keys = _.flatten(_.rest(arguments)); 
 		return  _(obj).filter$(function(val,key){return _.contains(keys,key);});
 	    },
-	    selectKeys_F:function (keys){
-		return function(obj){
-		    return  _.selectKeys(obj,keys);
-		};
-	    },
-	    selectKeysIf:function (obj,keys,filterFn){
-		return  _(obj).filter$(
-		    function(val,key){
-			return _.contains(keys,key) && filterFn(val);
-		    });
-	    }
-	});
 
-
-_.mixin({
 	    /*create an object without the keys in the selected keys array arg
 	     * ({a:'a',b:'b'},['a']) -> {b:'b'}
 	     */
 	    removeKeys:function (obj){
-		var keys = _.flatten(_.rest(arguments)); //do flatten because of older array notation, in which we can get an array in an array.
+		//do flatten because of older array notation, in which we can get an array in an array.
+		var keys = _.flatten(_.rest(arguments)); 
 		return _.filter$(obj,function(val,key){return !_.contains(keys,key);});
-	    }});
+	    }
+	});
 
 // unEscape a string for HTML interpolation.
 _.mixin({
@@ -102,12 +113,23 @@ _.mixin({isNotEmpty:function (obj){
 
 _.mixin({renameKeys:function (toEdit){
 	     //TODO: extract this function for converting args into object
+	     //FIXME: the arguments input for this function need to be simpler. it should not
+	     //allow for so many different types of argument input
 	     var fieldMap = _.flatten(_.rest(arguments));
 	     function transformArrayIntoFieldMap(arr){
 		 return _.chain(arr).partition(2).toObject().value();
 	     }
-
-	     var mergedFields = _.merge(fieldMap);
+	     
+	     //this is really stupid
+	     //FIXME: only have 1 or 2 inputs for this function
+	     //one method of input, and if another is desired then
+	     //make a new function for that style of input
+	     if(_.every(fieldMap,_.isObj)){
+		 var mergedFields = _.merge(fieldMap);
+	     }
+	     else{
+		 var mergedFields = fieldMap;
+	     }
 
 	     if(_.isObj(mergedFields)){
 		 var fMap = mergedFields;
@@ -125,85 +147,22 @@ _.mixin({renameKeys:function (toEdit){
 			       }
 			       else return [key,val];
 			   });
-	 },
-	 mapRenameKeys:function (list){
-	     var nameChanges = _.rest(arguments);
-	     return _.map(list,
-			  function(item){
-			      return _.renameKeys.apply(null,[item,nameChanges]);
-			  });    
 	 }
 	});
 
 _.mixin({merge:function (objArray){
-	     //merges all of the objects in an array into one object
-	     //probably can be done via apply.extend([...])
-	     if(_.every(objArray,_.isObj)){
-		 return _.reduce(objArray,function(sum,cur){return _.extend(sum,cur);},{});
-	     }
-	     else{
-		 return objArray;
-	     }
-	 },
-	 mapMerge:function(lists){
-	     return _.map(lists,_.merge);
+	     return _.combine.apply(null,objArray);
 	 },
 	 zipMerge:function (){
-	     return _.map(_.zip.apply(null,arguments),
-                          function(zipped){return _.merge(zipped);});
+	     var zippedArgs = _.zip.apply(null,_(arguments).toArray());
+	     return _.mapMerge(zippedArgs);
 	 }});
 
-//recursive _.extend
-//designed to work stand alone in couchdb
-_.mixin({
-	    extend_r:function(extendTo,extendFrom){
-		function isObject(obj) {
-		    return obj === Object(obj) && !(obj instanceof Array);
-		};
-		function mergeRecursive(extendTo, extendFrom) {
-		    for (var p in extendFrom) {
-			if (isObject(extendFrom[p])) {
-			    extendTo[p] = mergeRecursive({}, extendFrom[p]);
-			} else {
-			    extendTo[p] = extendFrom[p];
-			}
-		    }
-		    return extendTo;
-		}
-		return mergeRecursive(extendTo, extendFrom);
-	    }
-	});
-
-//recursive _.defaults
-//designed to work stand alone in couchdb
-_.mixin({
-	    fill:function(fillIn,fillFrom){
-		function isObject(obj) {
-		    return obj === Object(obj) && !(obj instanceof Array);
-		};
-		function mergeRecursive(fillIn, fillFrom) {
-		    for (var p in fillFrom) {
-			if (isObject(fillFrom[p])) {
-			    if(fillIn[p] === undefined){
-				fillIn[p] = mergeRecursive({}, fillFrom[p]);
-			    }
-			    else{
-				fillIn[p] = mergeRecursive(fillIn[p], fillFrom[p]);
-			    }
-			} 
-			else if(fillIn[p] === undefined){
-			    fillIn[p] = fillFrom[p];
-			}
-		    }
-		    return fillIn;
-		}
-		return mergeRecursive(fillIn, fillFrom);
-	    }
-	});
 
 
 
 //FIXME: remove this (at least the walk part)
+//_.walk has it's own library, remove this soon
 _.mixin({
 	    /*applies a function over the values of an object*/
 	    applyToValues:function(obj,fn,recursive){
@@ -263,14 +222,6 @@ _.mixin({
 		var o = {};
 		o[newFieldName] = _.selectKeys(obj,selectedKeysList);
 		return _.extend(_.removeKeys(obj,selectedKeysList),o);
-	    },
-	    nest_F:function(selectedKeysList,newFieldName){
-		return function(obj){
-		    return _.nest(obj,selectedKeysList,newFieldName);
-		};
-	    },
-	    mapNest:function (list,selectedKeysList,newFieldName){
-		return _.map(list,_.nest_F(selectedKeysList,newFieldName));    
 	    }
 	});
 
@@ -283,11 +234,11 @@ _.mixin({
 		    var addToClone = _.clone(addTo);
 		    for (var prop in addFrom) {
 			if(!_.isUndefined(addToClone[prop])){
-			    if(_.isNumber(addFrom[prop])){
-				addToClone[prop] += addFrom[prop];
+			    if(_.isNumber(addFrom[prop])){ //this would have to be replaced with a function as well
+				addToClone[prop] += addFrom[prop]; //TODO maybe this could be replaced with a function
 				continue;
 			    }
-			    else if(_.isObject(addFrom[prop])){
+			    else if(_.isObject(addFrom[prop])){ //maybe this would have to be replaced with a function too
 				addToClone[prop] = addPropertiesTogether_helper(addToClone[prop],addFrom[prop]);
 				continue;
 			    }
@@ -333,6 +284,9 @@ _.mixin({
 		else{
 		    return obj;
 		}
+	    },
+	    removeEmptyKeys : function(obj){
+		return filter$(obj,_.isNotEmpty);
 	    }
 	});
 
@@ -372,9 +326,16 @@ _.mixin({
 
 
 _.mixin({
+	    //todo rename to something better
+	    //supposed to be like a logical join
 	    joinOn:function(list,listToJoin,field){
 		var lists = list.concat(listToJoin);
-		var fieldsToJoinOn = _.chain(list).pluck(field).map(function(o){return o.toString();}).value();
+		var fieldsToJoinOn = _.chain(list)
+		    .pluck(field)
+		    .map(function(o){
+			     return o.toString();
+			 })
+		    .value();
 		return _.chain(lists)
 		    .groupBy(field)
 		    .filter(function(val,key){
@@ -390,8 +351,13 @@ _.mixin({
 //not like joinOn in that anything that isn't in both arrays is removed
 _.mixin({
 	    matchTo:function(primativeList,listToMatchOn,field){
-		var matchingFields = _.chain(listToMatchOn).pluck(field).intersection(primativeList).value();
-		return _.filter(listToMatchOn,function(item){return _.contains(matchingFields,item[field]);});
+		var matchingFields = _.chain(listToMatchOn)
+		    .pluck(field)
+		    .intersection(primativeList)
+		    .value();
+		return _.filter(listToMatchOn,
+				function(item){
+				    return _.contains(matchingFields,item[field]);});
 	    }
 	});
 
@@ -409,7 +375,78 @@ _.mixin({
 
 _.mixin({
 	    either:function(){
-		return _.chain(arguments).find(_.isDefined).value();
+		return _.chain(arguments)
+		    .find(function(val){return val!=null;})
+		    .value();
 	    }
 	});
 
+_.mixin({
+	    //depricated, use combine
+	    extend_r:function(extendTo,extendFrom){
+		function isObject(obj) {
+		    return obj === Object(obj) && !(obj instanceof Array);
+		};
+		function mergeRecursive(extendTo, extendFrom) {
+		    for (var p in extendFrom) {
+			if (isObject(extendFrom[p])) {
+			    extendTo[p] = mergeRecursive({}, extendFrom[p]);
+			} else {
+			    extendTo[p] = extendFrom[p];
+			}
+		    }
+		    return extendTo;
+		}
+		return mergeRecursive(extendTo, extendFrom);
+	    },
+	    fill:function(fillIn,fillFrom){
+		function isObject(obj) {
+		    return obj === Object(obj) && !(obj instanceof Array);
+		};
+		function mergeRecursive(fillIn, fillFrom) {
+		    for (var p in fillFrom) {
+			if (isObject(fillFrom[p])) {
+			    if(fillIn[p] === undefined){
+				fillIn[p] = mergeRecursive({}, fillFrom[p]);
+			    }
+			    else{
+				fillIn[p] = mergeRecursive(fillIn[p], fillFrom[p]);
+			    }
+			} 
+			else if(fillIn[p] === undefined){
+			    fillIn[p] = fillFrom[p];
+			}
+		    }
+		    return fillIn;
+		}
+		return mergeRecursive(fillIn, fillFrom);
+	    }
+	});
+
+_.mixin({
+	    //supposed to be a safe _.extend that is recursive and takes in v-args
+	    //use inplace of extend_r
+	    combine:function(){
+		return _.reduce(_(arguments).toArray(),
+				function(returnItem,curItem){
+				    return _.extend_r(returnItem,curItem);
+				},{});
+	    }
+	});
+
+_.mixin({
+	    mapCombine:_.mapVargFn(_.combine),
+	    mapSelectKeys:_.mapVargFn(_.selectKeys),
+	    mapRemoveKeys:_.mapVargFn(_.removeKeys),
+	    mapRenameKeys:_.mapVargFn(_.renameKeys),
+	    mapNest:_.mapVargFn(_.nest),
+	    mapMerge:_.mapVargFn(_.merge)
+/*
+	 mapMerge:function(lists){
+	     return _.map(lists,_.merge);
+	 },
+	    /* mapNest:function (list,selectedKeysList,newFieldName){
+	     return _.map(list,
+	     _.nest_F(selectedKeysList,newFieldName));    
+	     }*/
+	});

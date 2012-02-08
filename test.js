@@ -27,7 +27,6 @@ function _test(fnName){
 var pairs = _test("pairs"),
 toObject = _test("toObject"),
 selectKeys = _test("selectKeys"),
-selectKeysIf = _test("selectKeysIf"),
 removeKeys = _test("removeKeys"),
 unEscape = _test("unEscape"),
 isNotEmpty = _test("isNotEmpty"),
@@ -47,7 +46,9 @@ replace = _test("replace"),
 matchTo = _test("matchTo"),
 extend_r = _test("extend_r"),
 fill = _test("fill"),
-either = _test("either");
+either = _test("either"),
+combine = _test("combine"),
+mapCombine = _test("mapCombine");
 
 pairs({a:'a',b:'b'})
 ([['a','a'],['b','b']])
@@ -80,10 +81,6 @@ selectKeys({"a":'a',"b":'b'},['c'])
 selectKeys({a:'a',b:'b',c:4},['c'])
 ({c:4})
 ("selected from an obj that has some of them");
-
-selectKeysIf({"a":1,"b":2},['b'], function(val){return val % 2 == 0;})
-({b:2})
-("selected key if val is even");
 
 removeKeys({"a":1,"b":2},['b'])
 ({a:1})
@@ -208,8 +205,8 @@ mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],[['a','c'],['c','a']])
 ([{c:'b',a:'d'},{c:'b',a:'d'}])
 ("swapping key names! but with a pair array as the keymap input");
 
-mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],{'a':'c'},{'c':'a'})
-([{c:'b',a:'d'},{c:'b',a:'d'}])
+mapRenameKeys([{a:{a:'b'},c:'d'},{a:'b',c:'d'}],{'a':'c'},{'c':'a'})
+([{c:{a:'b'},a:'d'},{c:'b',a:'d'}])
 ("swapping key names! but with a vargs objs as the keymap input");
 
 //--------------------------------------------------
@@ -221,14 +218,6 @@ merge([{a:1},{a:2},{a:3}])
 merge([{a:1},{b:2},{c:3}])
 ({a:1,b:2,c:3})
 ("all objs in array have have different keys");
-
-merge([1,2,3])
-([1,2,3])
-("arrays has things that aren't objects");
-
-merge([[1],[2],[3]])
-([[1],[2],[3]])
-("arrays has things that aren't objects");
 
 mapMerge([[{a:1},{b:2},{c:3}],[{a:1},{a:2},{a:3}]])
 ([{a:1,b:2,c:3},{a:3}])
@@ -453,6 +442,72 @@ either(undefined, undefined)
 either(3, 1)
 (3)
 ("non-false args passed in, return first");
+
+//------------------- expand ---------------------------
+
+/*
+expand({},'abc')
+({})
+("expanding on an empty obj results in an empty list");
+
+expand({a:1},'a')
+({a:1})
+("expanding on a simple obj results in the same object");
+
+expand({a:{b:1}},'a')
+({b:1})
+("expanding on a nested obj results in the field being replaced");
+
+expand({a:{b:1},c:{e:2}},'a','c')
+({b:1,e:2})
+("expanding on a complex obj results in the selected fields being replaced");
+
+expand({a:{b:1},c:{b:2}},'a','c')
+({b:2})
+("conflict keys results in the last values overwritting the first");
+*/
+
+
+//---------------------------------- combine ------------------------------------
+combine({},{})
+({})
+("2 empty objects creates an empty object");
+
+combine({a:1},{b:2})
+({a:1,b:2})
+("2 simple objects creates another simple object");
+
+combine({a:1},{a:2})
+({a:2})
+("conflict keys overwrite with the last");
+
+combine({a:1},{a:2},{a:3})
+({a:3})
+("conflict keys overwrite with the last. 3 args");
+
+combine({a:1},{a:2},{a:3,b:3})
+({a:3,b:3})
+("conflict keys overwrite with the last. 3 args");
+
+combine({a:{b:1}},{a:{b:2}},{a:{b:3},b:3})
+({a:{b:3},b:3})
+("recursive merge keys overwrite with the last. 3 args");
+
+mapCombine([{a:1},{a:1}],{a:1})
+([{a:1},{a:1}])
+("conflict keys overwrite with the last, testing with 1 arg");
+
+mapCombine([{a:1},{a:1}],{a:1},{a:2})
+([{a:2},{a:2}])
+("conflict keys overwrite with the last, testing with 2 args");
+
+mapCombine([{a:1},{a:1}],{b:1})
+([{a:1,b:1},{a:1,b:1}])
+("extending an object to other obejects in the array");
+
+mapCombine([{a:1},{a:1}],{b:1,a:2})
+([{a:2,b:1},{a:2,b:1}])
+("conflict/extending an object to other obejects in the array");
 
 
 
