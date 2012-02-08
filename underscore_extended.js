@@ -61,7 +61,7 @@ _.mixin({
 	    selectKeys:function (obj){
 		//do flatten because of older array notation, in which we can get an array in an array.
 		var keys = _.flatten(_.rest(arguments)); 
-		return  _(obj).filter$(function(val,key){return _.contains(keys,key);});
+		return  _.filter$(obj,function(val,key){return _.contains(keys,key);});
 	    },
 
 	    /*create an object without the keys in the selected keys array arg
@@ -441,12 +441,4 @@ _.mixin({
 	    mapRenameKeys:_.mapVargFn(_.renameKeys),
 	    mapNest:_.mapVargFn(_.nest),
 	    mapMerge:_.mapVargFn(_.merge)
-/*
-	 mapMerge:function(lists){
-	     return _.map(lists,_.merge);
-	 },
-	    /* mapNest:function (list,selectedKeysList,newFieldName){
-	     return _.map(list,
-	     _.nest_F(selectedKeysList,newFieldName));    
-	     }*/
 	});
