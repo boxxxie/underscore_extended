@@ -442,3 +442,32 @@ _.mixin({
 	    mapNest:_.mapVargFn(_.nest),
 	    mapMerge:_.mapVargFn(_.merge)
 	});
+
+_.mixin({
+	    //applies a list of functions to a set of arguments and outputs all of the results in an array
+	    juxtapose:function(){
+		var functions = arguments;
+		return function(){
+		    var args = _.toArray(arguments);
+		    return _.map(functions,function(fn){
+				     return fn.apply(null,args);
+				 });
+		};
+	    }
+	});
+
+_.mixin({
+	    splitKeys:_.juxtapose(_.selectKeys,_.removeKeys)
+	});
+
+_.mixin({
+	    //returns a frequencies object based on the list/iterator
+	    frequencies:function(list,iterator){
+		return _.chain(list)
+		    .groupBy(iterator)
+		    .map$(function(val,key){
+			      return [key,_.size(val)];
+			  })
+		    .value();
+	    }
+	});

@@ -48,7 +48,8 @@ extend_r = _test("extend_r"),
 fill = _test("fill"),
 either = _test("either"),
 combine = _test("combine"),
-mapCombine = _test("mapCombine");
+mapCombine = _test("mapCombine"),
+splitKeys = _test("splitKeys");
 
 pairs({a:'a',b:'b'})
 ([['a','a'],['b','b']])
@@ -97,7 +98,7 @@ removeKeys({"a":1,"b":2,c:[1,2,3]},['c'])
 removeKeys({"a":1,"b":2},['c'])
 ({a:1,b:2})
 ("remove a key from a simple object that doesn't have the key");
- //----------- different syntax
+//----------- different syntax
 removeKeys({"a":1,"b":2},'b')
 ({a:1})
 ("remove a key from a simple object");
@@ -446,26 +447,26 @@ either(3, 1)
 //------------------- expand ---------------------------
 
 /*
-expand({},'abc')
-({})
-("expanding on an empty obj results in an empty list");
+ expand({},'abc')
+ ({})
+ ("expanding on an empty obj results in an empty list");
 
-expand({a:1},'a')
-({a:1})
-("expanding on a simple obj results in the same object");
+ expand({a:1},'a')
+ ({a:1})
+ ("expanding on a simple obj results in the same object");
 
-expand({a:{b:1}},'a')
-({b:1})
-("expanding on a nested obj results in the field being replaced");
+ expand({a:{b:1}},'a')
+ ({b:1})
+ ("expanding on a nested obj results in the field being replaced");
 
-expand({a:{b:1},c:{e:2}},'a','c')
-({b:1,e:2})
-("expanding on a complex obj results in the selected fields being replaced");
+ expand({a:{b:1},c:{e:2}},'a','c')
+ ({b:1,e:2})
+ ("expanding on a complex obj results in the selected fields being replaced");
 
-expand({a:{b:1},c:{b:2}},'a','c')
-({b:2})
-("conflict keys results in the last values overwritting the first");
-*/
+ expand({a:{b:1},c:{b:2}},'a','c')
+ ({b:2})
+ ("conflict keys results in the last values overwritting the first");
+ */
 
 
 //---------------------------------- combine ------------------------------------
@@ -509,6 +510,8 @@ mapCombine([{a:1},{a:1}],{b:1,a:2})
 ([{a:2,b:1},{a:2,b:1}])
 ("conflict/extending an object to other obejects in the array");
 
-
+splitKeys({a:1,b:1,c:1},'a')
+([{a:1},{b:1,c:1}])
+("spliting an object into two");
 
 console.log("tests finished");
