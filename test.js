@@ -49,7 +49,12 @@ fill = _test("fill"),
 either = _test("either"),
 combine = _test("combine"),
 mapCombine = _test("mapCombine"),
-splitKeys = _test("splitKeys");
+splitKeys = _test("splitKeys"),
+addPropertiesTogether = _test("addPropertiesTogether"),
+add = _test("add"),
+subtract = _test("subtract"),
+multiply = _test("multiply"),
+divide = _test("divide");
 
 pairs({a:'a',b:'b'})
 ([['a','a'],['b','b']])
@@ -156,18 +161,6 @@ renameKeys({a:'b',c:'d'},{a:'ba'})
 ({ba:'b',c:'d'})
 ("rename keys in simple obj");
 
-renameKeys({a:'b',c:'d'},[{a:'ba'}])
-({ba:'b',c:'d'})
-("rename keys in simple obj, different args");
-
-renameKeys({a:'b',c:'d'},[{a:'ba'},{c:'na'}])
-({ba:'b',na:'d'})
-("rename keys in simple obj, different args");
-
-renameKeys({a:'b',c:'d'},{a:'ba'},{c:'na'})
-({ba:'b',na:'d'})
-("rename keys in simple obj, different args");
-
 renameKeys({a:'b',c:'d'},{a:'c', c:'a'})
 ({c:'b',a:'d'})
 ("swapping key names!");
@@ -186,6 +179,7 @@ renameKeys({a:'b',c:'d'},[['a','c'],['c','a']])
 
 //----------------------------------------------map rename
 
+/*
 mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],{a:'ba'})
 ([{ba:'b',c:'d'},{ba:'b',c:'d'}])
 ("rename keys in simple obj");
@@ -193,7 +187,7 @@ mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],{a:'ba'})
 mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],{a:'c', c:'a'})
 ([{c:'b',a:'d'},{c:'b',a:'d'}])
 ("swapping key names!");
-
+*/
 mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],['a','c','c','a'])
 ([{c:'b',a:'d'},{c:'b',a:'d'}])
 ("swapping key names! but with an array as the keymap input");
@@ -205,11 +199,11 @@ mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],'a','c','c','a')
 mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],[['a','c'],['c','a']])
 ([{c:'b',a:'d'},{c:'b',a:'d'}])
 ("swapping key names! but with a pair array as the keymap input");
-
+/*
 mapRenameKeys([{a:{a:'b'},c:'d'},{a:'b',c:'d'}],{'a':'c'},{'c':'a'})
 ([{c:{a:'b'},a:'d'},{c:'b',a:'d'}])
 ("swapping key names! but with a vargs objs as the keymap input");
-
+*/
 //--------------------------------------------------
 
 merge([{a:1},{a:2},{a:3}])
@@ -352,24 +346,24 @@ extend_r({c:0},{a:{b:1}})
 ("recursive extend onto a non-empty objet, leaving 1 field unchanged and adding a new top-level field");
 
 extend_r(
-    {_id: "02bb06f0fed1596decf2024a4c025997", 
-     _rev: "2-27c295b83271e6dcc2dc43df18444177", 
-     date: "Wed Jan 25 2012 22:24:01 GMT-0500 (EST)", 
-     price: {selling_price: 2}, 
-     description: "invNeww", 
+    {_id: "02bb06f0fed1596decf2024a4c025997",
+     _rev: "2-27c295b83271e6dcc2dc43df18444177",
+     date: "Wed Jan 25 2012 22:24:01 GMT-0500 (EST)",
+     price: {selling_price: 2},
+     description: "invNeww",
      upccode: "01123456"},
-    {_id: "02bb06f0fed1596decf2024a4c029a59", 
-     _rev: "5-484927d67a1be1454431b4143059c87c", 
-     date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)", 
-     description: "invNeww", 
-     apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true}, 
+    {_id: "02bb06f0fed1596decf2024a4c029a59",
+     _rev: "5-484927d67a1be1454431b4143059c87c",
+     date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)",
+     description: "invNeww",
+     apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true},
      upccode: "01123456"})
-({_id: "02bb06f0fed1596decf2024a4c029a59", 
-  _rev: "5-484927d67a1be1454431b4143059c87c", 
-  date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)", 
-  description: "invNeww", 
+({_id: "02bb06f0fed1596decf2024a4c029a59",
+  _rev: "5-484927d67a1be1454431b4143059c87c",
+  date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)",
+  description: "invNeww",
   price: {selling_price: 2},
-  apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true}, 
+  apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true},
   upccode: "01123456"})
 ("complex real world object filling in a missing field");
 
@@ -405,24 +399,24 @@ fill({a:{b:1}},{a:{b:2,c:3}})
 
 
 fill(
-    {_id: "02bb06f0fed1596decf2024a4c029a59", 
-     _rev: "5-484927d67a1be1454431b4143059c87c", 
-     date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)", 
-     description: "invNeww", 
-     apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true}, 
+    {_id: "02bb06f0fed1596decf2024a4c029a59",
+     _rev: "5-484927d67a1be1454431b4143059c87c",
+     date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)",
+     description: "invNeww",
+     apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true},
      upccode: "01123456"},
-    {_id: "02bb06f0fed1596decf2024a4c025997", 
-     _rev: "2-27c295b83271e6dcc2dc43df18444177", 
-     date: "Wed Jan 25 2012 22:24:01 GMT-0500 (EST)", 
-     price: {selling_price: 2}, 
-     description: "invNeww", 
+    {_id: "02bb06f0fed1596decf2024a4c025997",
+     _rev: "2-27c295b83271e6dcc2dc43df18444177",
+     date: "Wed Jan 25 2012 22:24:01 GMT-0500 (EST)",
+     price: {selling_price: 2},
+     description: "invNeww",
      upccode: "01123456"})
-({_id: "02bb06f0fed1596decf2024a4c029a59", 
-  _rev: "5-484927d67a1be1454431b4143059c87c", 
-  date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)", 
+({_id: "02bb06f0fed1596decf2024a4c029a59",
+  _rev: "5-484927d67a1be1454431b4143059c87c",
+  date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)",
   description: "invNeww",
-  price: {selling_price: 2},  
-  apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true}, 
+  price: {selling_price: 2},
+  apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true},
   upccode: "01123456"})
 ("complex real world object filling in a missing field");
 
@@ -513,5 +507,17 @@ mapCombine([{a:1},{a:1}],{b:1,a:2})
 splitKeys({a:1,b:1,c:1},'a')
 ([{a:1},{b:1,c:1}])
 ("spliting an object into two");
+
+addPropertiesTogether({a:1},{a:1})
+({a:2})
+("adding simple 1 element objects together");
+
+add({a:1},{a:1})
+({a:2})
+("adding simple 1 element objects together");
+
+subtract({a:1,b:{b:2}},{b:{b:1}})
+({a:1,b:{b:1}})
+("subtracting a nested object");
 
 console.log("tests finished");

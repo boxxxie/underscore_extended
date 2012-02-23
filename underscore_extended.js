@@ -7,21 +7,25 @@ _.mixin({
 	     * examples below include mapCombine
 	     * examples of the uses of the map functions can be seen in the test.js file
 	     */
-	    mapVargFn:function(fn){
+	    mapVargFn:function(transformation){
 		return function(list){
+		    /*this is an optimization (prob the most common case)
+		     * basically, this covers transformations that have 1 argument
+		     * example : _.combine(ojb1,obj2)
+		     * obj1 is given by the map fn, obj2 is given by the user.
+		     * this optimization avoids fn.apply & _.rest
+		     */
 		    if(_.size(arguments) === 1){
-			var arg = _.first(arguments);
-			return _.map(list,
-				     function(item){
-					 return fn(item,arg);
-				     });
+			var user_argument = _.first(arguments);
+			return _.map(list, function(item){
+				    return transformation(item,user_argument);
+				});
 		    }
 		    else{
-			var args = _.chain(arguments).rest().toArray().value();
-			return _.map(list,
-				     function(item){
-					 return fn.apply(null,_.flatten([item,args]));
-				     });
+			var user_arguments = _.rest(arguments);
+			return _.map(list, function(item){
+				    return transformation.apply(null,_.flatten([item,user_arguments]));
+				});
 		    }
 		};
 	    }
@@ -60,7 +64,7 @@ _.mixin({
 	     */
 	    selectKeys:function (obj){
 		//do flatten because of older array notation, in which we can get an array in an array.
-		var keys = _.flatten(_.rest(arguments)); 
+		var keys = _.flatten(_.rest(arguments));
 		return  _.filter$(obj,function(val,key){return _.contains(keys,key);});
 	    },
 
@@ -69,7 +73,7 @@ _.mixin({
 	     */
 	    removeKeys:function (obj){
 		//do flatten because of older array notation, in which we can get an array in an array.
-		var keys = _.flatten(_.rest(arguments)); 
+		var keys = _.flatten(_.rest(arguments));
 		return _.filter$(obj,function(val,key){return !_.contains(keys,key);});
 	    }
 	});
@@ -111,42 +115,32 @@ _.mixin({isNotEmpty:function (obj){
 	});
 
 
-_.mixin({renameKeys:function (toEdit){
-	     //TODO: extract this function for converting args into object
-	     //FIXME: the arguments input for this function need to be simpler. it should not
-	     //allow for so many different types of argument input
-	     var fieldMap = _.flatten(_.rest(arguments));
+_.mixin({renameKeys:function (obj_for_key_renaming){
+	     var args = _.rest(arguments);
+	     var fieldMap = _.first(args);
+
 	     function transformArrayIntoFieldMap(arr){
-		 return _.chain(arr).partition(2).toObject().value();
-	     }
-	     
-	     //this is really stupid
-	     //FIXME: only have 1 or 2 inputs for this function
-	     //one method of input, and if another is desired then
-	     //make a new function for that style of input
-	     if(_.every(fieldMap,_.isObj)){
-		 var mergedFields = _.merge(fieldMap);
-	     }
-	     else{
-		 var mergedFields = fieldMap;
+		 return _.chain(arr).flatten().partition(2).toObject().value();
 	     }
 
-	     if(_.isObj(mergedFields)){
-		 var fMap = mergedFields;
+	     if(_.isObj(fieldMap)){
+		 var fMap = fieldMap;
 	     }
-	     else if (_.isArray(mergedFields)){
-		 var fMap = transformArrayIntoFieldMap(mergedFields);
+	     else if (_.isArray(args)){
+		 var fMap = transformArrayIntoFieldMap(args);
 	     }
 	     else{
-		 return toEdit;	 
+		 return obj_for_key_renaming;
 	     }
-	     return _.map$(toEdit,
-			   function(val,key){
-			       if(_.isDefined(fMap[key])){
-				   return [fMap[key],val];
-			       }
-			       else return [key,val];
-			   });
+	     //map$ preserves the object
+	     return _.map$(obj_for_key_renaming,
+		      function(val,key){
+			  var renamed_key = fMap[key];
+			  if(_.isDefined(renamed_key)){
+			      return [renamed_key,val];
+			  }
+			  else return [key,val];
+		      });
 	 }
 	});
 
@@ -186,8 +180,8 @@ _.mixin({
 				walked[prop] = transformedVal;
 				_.extend(ret,walked);
 			    }
-			} 
-		    }  
+			}
+		    }
 		    return ret;
 		};
 
@@ -225,30 +219,56 @@ _.mixin({
 	    }
 	});
 
+//Generic operators over objects
 _.mixin({
 	    //fn({a:1},{a:1}) -> {a:2}
 	    //make recursive
 	    //fn({a:{b:1},c:1},{a:{b:1},c:1}) -> {a:{b:2},c:2}
-	    addPropertiesTogether:function(addTo,addFrom){
-		function addPropertiesTogether_helper(addTo,addFrom){
-		    var addToClone = _.clone(addTo);
-		    for (var prop in addFrom) {
-			if(!_.isUndefined(addToClone[prop])){
-			    if(_.isNumber(addFrom[prop])){ //this would have to be replaced with a function as well
-				addToClone[prop] += addFrom[prop]; //TODO maybe this could be replaced with a function
-				continue;
+	    combinePropertiesTogether:function(transformation){
+		return function(addTo,addFrom){
+		    function addPropertiesTogether_helper(addTo,addFrom){
+		//	var addToClone = _.clone(addTo);   //probably do not need to clone here. if so, then dependance on underscore is removed
+			var addToClone = addTo;
+			for (var prop in addFrom) {
+			    if(addToClone[prop] === undefined){
+				addToClone[prop] = addFrom[prop];
 			    }
-			    else if(_.isObject(addFrom[prop])){ //maybe this would have to be replaced with a function too
+			    else if(_.isObj(addFrom[prop])){
 				addToClone[prop] = addPropertiesTogether_helper(addToClone[prop],addFrom[prop]);
-				continue;
+			    }
+			    else{
+				addToClone[prop] = transformation(addToClone[prop],addFrom[prop]);
 			    }
 			}
-			addToClone[prop] = addFrom[prop];
+			return addToClone;
 		    }
-		    return addToClone;
-		}
-		return addPropertiesTogether_helper(addTo,addFrom);
-	    }});
+		    return addPropertiesTogether_helper(addTo,addFrom);
+		};
+	    }
+
+	});
+
+function numericOperator(op){
+    return function (a,b){
+	if(_.isNumber(a) || _.isNumber(b)){
+	    return op(a,b);
+	}
+	return b;
+    };
+}
+
+function add(a,b){ return a + b;}
+function subtract(a,b){ return a - b;}
+function multiply(a,b){ return a * b;}
+function divide(a,b){ return a / b;}
+
+_.mixin({
+	    addPropertiesTogether : _.combinePropertiesTogether(numericOperator(add)),
+	    add : _.combinePropertiesTogether(numericOperator(add)),
+	    subtract : _.combinePropertiesTogether(numericOperator(subtract)),
+	    multiply : _.combinePropertiesTogether(numericOperator(multiply)),
+	    divide : _.combinePropertiesTogether(numericOperator(divide))
+	});
 
 _.mixin({
 	    log:function(logText){
@@ -339,7 +359,7 @@ _.mixin({
 		return _.chain(lists)
 		    .groupBy(field)
 		    .filter(function(val,key){
-				return _.contains(fieldsToJoinOn,key);	 
+				return _.contains(fieldsToJoinOn,key);
 			    })
 		    .mapMerge()
 		    .flatten()
@@ -412,7 +432,7 @@ _.mixin({
 			    else{
 				fillIn[p] = mergeRecursive(fillIn[p], fillFrom[p]);
 			    }
-			} 
+			}
 			else if(fillIn[p] === undefined){
 			    fillIn[p] = fillFrom[p];
 			}
