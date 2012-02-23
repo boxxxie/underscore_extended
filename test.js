@@ -179,7 +179,7 @@ renameKeys({a:'b',c:'d'},[['a','c'],['c','a']])
 
 //----------------------------------------------map rename
 
-/*
+
 mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],{a:'ba'})
 ([{ba:'b',c:'d'},{ba:'b',c:'d'}])
 ("rename keys in simple obj");
@@ -187,7 +187,7 @@ mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],{a:'ba'})
 mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],{a:'c', c:'a'})
 ([{c:'b',a:'d'},{c:'b',a:'d'}])
 ("swapping key names!");
-*/
+
 mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],['a','c','c','a'])
 ([{c:'b',a:'d'},{c:'b',a:'d'}])
 ("swapping key names! but with an array as the keymap input");
@@ -199,11 +199,7 @@ mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],'a','c','c','a')
 mapRenameKeys([{a:'b',c:'d'},{a:'b',c:'d'}],[['a','c'],['c','a']])
 ([{c:'b',a:'d'},{c:'b',a:'d'}])
 ("swapping key names! but with a pair array as the keymap input");
-/*
-mapRenameKeys([{a:{a:'b'},c:'d'},{a:'b',c:'d'}],{'a':'c'},{'c':'a'})
-([{c:{a:'b'},a:'d'},{c:'b',a:'d'}])
-("swapping key names! but with a vargs objs as the keymap input");
-*/
+
 //--------------------------------------------------
 
 merge([{a:1},{a:2},{a:3}])
