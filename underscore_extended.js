@@ -1,4 +1,28 @@
-var _ = require("./underscore");
+var _ = require("./underscore")
+
+
+_.mixin({
+	    //watch out when using these functions in map/filter/reduce
+	    partial:function(fn){
+		var partialArgs = _.rest(arguments)
+		return function(){
+		    var completedArgs = _.toArray(arguments)
+		    fn.apply(null,[].concat(partialArgs,completedArgs))
+		}
+	    },
+	    //i'm not sure if this is ok, or if it is going to promote bad design
+	    //todo: had some problems with mapMerge. do some testing on the below fn
+	    reverse_partial:function(fn){
+		var partialArgs = _.rest(arguments)
+		return function(){
+		    var completedArgs = _.toArray(arguments)
+		   // console.log("reverse partial args")
+		   // console.log(completedArgs)
+		  //  console.log([].concat(completedArgs,partialArgs))
+		    fn.apply(null,[].concat(completedArgs,partialArgs))
+		}
+	    }
+	})
 
 _.mixin({
 	    /*
@@ -9,29 +33,21 @@ _.mixin({
 	     */
 	    mapVargFn:function(transformation){
 		return function(list){
-		    /*this is an optimization (prob the most common case)
-		     * basically, this covers transformations that have 1 argument
-		     * example : _.combine(ojb1,obj2)
-		     * obj1 is given by the map fn, obj2 is given by the user.
-		     * this optimization avoids fn.apply & _.rest
-		     */
-		    if(_.size(arguments) === 1){
-			var user_argument = _.first(arguments);
-			return _.map(list, function(item){
-				    return transformation(item,user_argument);
-				});
-		    }
-		    else{
-			var user_arguments = _.rest(arguments);
-			return _.map(list, function(item){
-				    return transformation.apply(null,_.flatten([item,user_arguments]));
-				});
-		    }
+		    var user_arguments = _.rest(arguments);
+		   // console.log('arguments');
+		   // console.log(arguments);
+		   // console.log('user_arguments');
+		   // console.log(user_arguments);
+		    return _.map(list, function(item){
+			//	console.log(_([item]).concat(user_arguments))
+				return transformation.apply(null,_([item]).concat(user_arguments));
+			    });
 		};
 	    }
 	});
 
 _.mixin({
+	    //isObject will mix up objects and arrays, this will not.
 	    isObj:function (obj) {
 		return _.isObject(obj) && !_.isArray(obj);
 	    }
@@ -144,13 +160,7 @@ _.mixin({renameKeys:function (obj_for_key_renaming){
 	 }
 	});
 
-_.mixin({merge:function (objArray){
-	     return _.combine.apply(null,objArray);
-	 },
-	 zipMerge:function (){
-	     var zippedArgs = _.zip.apply(null,_(arguments).toArray());
-	     return _.mapMerge(zippedArgs);
-	 }});
+
 
 
 
@@ -396,7 +406,9 @@ _.mixin({
 _.mixin({
 	    either:function(){
 		return _.chain(arguments)
-		    .find(function(val){return val!=null;})
+		    .toArray()
+		    .compact()
+		    .first()
 		    .value();
 	    }
 	});
@@ -454,6 +466,14 @@ _.mixin({
 	    }
 	});
 
+_.mixin({merge:function (objArray){
+	     return _.combine.apply(null,objArray);
+	 },
+	 zipMerge:function (){
+	     var zippedArgs = _.zip.apply(null,_(arguments).toArray());
+	     return _.mapMerge(zippedArgs);
+	 }});
+
 _.mixin({
 	    mapCombine:_.mapVargFn(_.combine),
 	    mapSelectKeys:_.mapVargFn(_.selectKeys),
@@ -461,6 +481,7 @@ _.mixin({
 	    mapRenameKeys:_.mapVargFn(_.renameKeys),
 	    mapNest:_.mapVargFn(_.nest),
 	    mapMerge:_.mapVargFn(_.merge)
+	   // mapMerge:_.reverse_partial(_.map,_.merge)
 	});
 
 _.mixin({

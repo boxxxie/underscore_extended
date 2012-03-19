@@ -38,7 +38,6 @@ mapMerge = _test("mapMerge"),
 zipMerge = _test("zipMerge"),
 partition = _test("partition"),
 nest = _test("nest"),
-mapNest = _test("mapNest"),
 filter$ = _test("filter$"),
 map$ = _test("map$"),
 compress = _test("compress"),
@@ -211,6 +210,12 @@ merge([{a:1},{b:2},{c:3}])
 ({a:1,b:2,c:3})
 ("all objs in array have have different keys");
 
+console.log("test map merge")
+console.log(_.mapMerge([
+	     [{a:1},{b:2},{c:3}],
+	     [{a:1},{a:2},{a:3}]
+	 ]))
+
 mapMerge([
 	     [{a:1},{b:2},{c:3}],
 	     [{a:1},{a:2},{a:3}]
@@ -253,18 +258,9 @@ nest({},['a','b','c'],'field')
 ({field:{}})
 ("nest keys in an empty object");
 
-//not sure if this should be what happens...
-nest({c:1},['a','b'],'field')
-({c:1,field:{}})
-("nest keys in an empty object, no matches by new field made");
-
 nest({d:1,f:2,g:3},['a','b','c'],'field')
 ({field:{},d:1,f:2,g:3})
 ("nest keys in an object where none match");
-
-mapNest([{a:1},{b:1},{c:1}],['a','b'],'field')
-([{field:{a:1}},{field:{b:1}},{c:1,field:{}}])
-('testing on array of simple objects, last case doesnt nest');
 
 filter$({a:1,b:2,c:3},function(val){return val == 3;})
 ({c:3})
@@ -435,7 +431,7 @@ fill(
 //--------------------------- either -------------------------
 
 either(undefined,undefined,null,0,1)
-(1)
+(0)
 ("simple list of false vals with the last one being the one returend");
 
 either()
