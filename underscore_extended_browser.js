@@ -1,25 +1,4 @@
-_.mixin({
-	    //watch out when using these functions in map/filter/reduce
-	    partial:function(fn){
-		var partialArgs = _.rest(arguments)
-		return function(){
-		    var completedArgs = _.toArray(arguments)
-		    fn.apply(null,[].concat(partialArgs,completedArgs))
-		}
-	    },
-	    //i'm not sure if this is ok, or if it is going to promote bad design
-	    //todo: had some problems with mapMerge. do some testing on the below fn
-	    reverse_partial:function(fn){
-		var partialArgs = _.rest(arguments)
-		return function(){
-		    var completedArgs = _.toArray(arguments)
-		   // console.log("reverse partial args")
-		   // console.log(completedArgs)
-		  //  console.log([].concat(completedArgs,partialArgs))
-		    fn.apply(null,[].concat(completedArgs,partialArgs))
-		}
-	    }
-	})
+
 
 _.mixin({
 	    /*
@@ -47,6 +26,11 @@ _.mixin({
 	    //isObject will mix up objects and arrays, this will not.
 	    isObj:function (obj) {
 		return _.isObject(obj) && !_.isArray(obj);
+	    },
+	    obj:function(key,val){
+		var o ={};
+		o[key]=val;
+		return o;
 	    }
 	});
 
@@ -56,8 +40,9 @@ _.mixin({
 	     */
 	    pairs:function (obj) {
 		return _.map(obj,function(val,key){
-				 return [key,val];
-			     });}});
+			    return [key,val];
+			});
+	    }});
 
 _.mixin({
 	    /*converts an array of pairs into an objcet
@@ -127,7 +112,11 @@ _.mixin({isNotEmpty:function (obj){
 	 }
 	});
 
-
+_.mixin({
+	    second:function (list){
+		return _.first(_.rest(list));
+	    }
+	});
 _.mixin({renameKeys:function (obj_for_key_renaming){
 	     var args = _.rest(arguments);
 	     var fieldMap = _.first(args);
@@ -147,7 +136,9 @@ _.mixin({renameKeys:function (obj_for_key_renaming){
 	     }
 	     //map$ preserves the object
 	     return _.map$(obj_for_key_renaming,
-		      function(val,key){
+		      function(pair){
+			  var key = _.first(pair);
+			  var val = _.second(pair);
 			  var renamed_key = fMap[key];
 			  if(_.isDefined(renamed_key)){
 			      return [renamed_key,val];
@@ -157,7 +148,13 @@ _.mixin({renameKeys:function (obj_for_key_renaming){
 	 }
 	});
 
-
+_.mixin({merge:function (objArray){
+	     return _.combine.apply(null,objArray);
+	 },
+	 zipMerge:function (){
+	     var zippedArgs = _.zip.apply(null,_(arguments).toArray());
+	     return _.mapMerge(zippedArgs);
+	 }});
 
 
 
@@ -200,7 +197,12 @@ _.mixin({
 		    return pre_walk(obj,fn);
 		}
 		else{
-		    return _.map$(obj,function(val,key){return [key,fn(val)];});
+		    return _.map$(obj,
+			     function(pair){
+				 var key = _.first(pair);
+				 var val = _.second(pair);
+				 return [key,fn(val)];
+			     });
 		}
 	    }});
 
@@ -313,19 +315,23 @@ _.mixin({
 		}
 	    },
 	    removeEmptyKeys : function(obj){
-		return filter$(obj,_.isNotEmpty);
+		return _.filter$(obj,_.isNotEmpty);
 	    }
 	});
 
 _.mixin({
-	    //_.map$({a:1,b:2},function(val,key){return [key,val] }) -> {a:1,b:2}
-	    // _.map$([{a:1},{b:2}],function(val,key){return val }) -> [{a:1},{b:2}]
+	    //_.map$({a:1,b:2},_.identity) -> {a:1,b:2}
 	    map$:function(obj,iterator){
 		if(_.isArray(obj)){
 		    return _.map(obj,iterator);
 		}
 		else if(_.isObject(obj)){
-		    return _(_.map(obj,iterator)).toObject();
+		    return _.chain(obj)
+			.pairs()
+			.map(iterator)
+			.toObject()
+			.value()
+		   // return _(_.map(obj,iterator)).toObject();
 		}
 		else{
 		    return obj;
@@ -463,14 +469,6 @@ _.mixin({
 	    }
 	});
 
-_.mixin({merge:function (objArray){
-	     return _.combine.apply(null,objArray);
-	 },
-	 zipMerge:function (){
-	     var zippedArgs = _.zip.apply(null,_(arguments).toArray());
-	     return _.mapMerge(zippedArgs);
-	 }});
-
 _.mixin({
 	    mapCombine:_.mapVargFn(_.combine),
 	    mapSelectKeys:_.mapVargFn(_.selectKeys),
@@ -478,7 +476,6 @@ _.mixin({
 	    mapRenameKeys:_.mapVargFn(_.renameKeys),
 	    mapNest:_.mapVargFn(_.nest),
 	    mapMerge:_.mapVargFn(_.merge)
-	   // mapMerge:_.reverse_partial(_.map,_.merge)
 	});
 
 _.mixin({
@@ -503,9 +500,31 @@ _.mixin({
 	    frequencies:function(list,iterator){
 		return _.chain(list)
 		    .groupBy(iterator)
-		    .map$(function(val,key){
+		    .map$(function(pair){
+			      var key = _.first(pair);
+			      var val = _.second(pair);
 			      return [key,_.size(val)];
 			  })
 		    .value();
+	    }
+	});
+
+_.mixin({
+	    curry:function(fn) {
+		var args = _.chain(arguments).toArray().rest().value();
+		return function() {
+		    return fn.apply(this, args.concat(
+				   Array.prototype.slice.call(arguments)));
+		}
+	    },
+	    partial : function(fn){
+		var args = _.chain(arguments).toArray().rest().value();
+		return function(){
+		    var arg = 0;
+		    for ( var i = 0; i < args.length && arg < arguments.length; i++ )
+			if ( args[i] === undefined )
+			    args[i] = arguments[arg++];
+		    return fn.apply(this, args);
+		};
 	    }
 	});

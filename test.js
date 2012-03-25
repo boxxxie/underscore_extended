@@ -278,15 +278,15 @@ filter$({},function(val){return val == 4;})
 ({})
 ("empty obj");
 
-map$({a:1,b:2,c:3},function(val,key){return [key,0];})
+map$({a:1,b:2,c:3},function(pair){var key = _.first(pair); var val = _.second(pair);return [key,0];})
 ({a:0,b:0,c:0})
 ("transforming all the vals of an object");
 
-map$({a:1,b:2,c:3},function(val,key){return [val,val];}) //this really shouldn't be done
+map$({a:1,b:2,c:3},function(pair){var key = _.first(pair); var val = _.second(pair);return [val,val];}) //this really shouldn't be done
 ({1:1,2:2,3:3})
 ("transforming all the keys of an object");
 
-map$({},function(val,key){return [val,val];}) //this really shouldn't be done
+map$({},function(pair){var key = _.first(pair); var val = _.second(pair);return [val,val];}) //this really shouldn't be done
 ({})
 ("empty object");
 
