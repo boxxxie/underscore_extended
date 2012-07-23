@@ -10,12 +10,7 @@ _.mixin({
 	    mapVargFn:function(transformation){
 		return function(list){
 		    var user_arguments = _.rest(arguments);
-		   // console.log('arguments');
-		   // console.log(arguments);
-		   // console.log('user_arguments');
-		   // console.log(user_arguments);
 		    return _.map(list, function(item){
-			//	console.log(_([item]).concat(user_arguments))
 				return transformation.apply(null,_([item]).concat(user_arguments));
 			    });
 		};
@@ -156,56 +151,6 @@ _.mixin({merge:function (objArray){
 	     return _.mapMerge(zippedArgs);
 	 }});
 
-
-
-
-//FIXME: remove this (at least the walk part)
-//_.walk has it's own library, remove this soon
-_.mixin({
-	    /*applies a function over the values of an object*/
-	    applyToValues:function(obj,fn,recursive){
-		function identity(o){
-		    return o;
-		};
-
-		//the transformer needs to take in 1 args
-		//it needs to return the transformed obj. noop = return first arg;
-		//refer to tests
-		function walk(o,pretran,posttran){
-		    //transforms data in a js object via a walk function
-		    o = pretran(o);
-		    var ret = o;
-		    if(typeof o == 'object'){
-			for(var prop in o){
-			    if(o.hasOwnProperty(prop)){
-				var val = o[prop];
-				var transformedVal = posttran(walk(val,pretran,posttran));
-				var walked = {};
-				walked[prop] = transformedVal;
-				_.extend(ret,walked);
-			    }
-			}
-		    }
-		    return ret;
-		};
-
-		var pre_walk = function(o,trans){
-		    return walk(o,trans,identity);
-		};
-
-		if(recursive){
-		    return pre_walk(obj,fn);
-		}
-		else{
-		    return _.map$(obj,
-			     function(pair){
-				 var key = _.first(pair);
-				 var val = _.second(pair);
-				 return [key,fn(val)];
-			     });
-		}
-	    }});
-
 _.mixin({
 	    partition:function(arr,size){
 		function partition_helper(arr,size){
@@ -236,7 +181,6 @@ _.mixin({
 	    combinePropertiesTogether:function(transformation){
 		return function(addTo,addFrom){
 		    function addPropertiesTogether_helper(addTo,addFrom){
-		//	var addToClone = _.clone(addTo);   //probably do not need to clone here. if so, then dependance on underscore is removed
 			var addToClone = addTo;
 			for (var prop in addFrom) {
 			    if(addToClone[prop] === undefined){
@@ -331,7 +275,6 @@ _.mixin({
 			.map(iterator)
 			.toObject()
 			.value()
-		   // return _(_.map(obj,iterator)).toObject();
 		}
 		else{
 		    return obj;
@@ -508,7 +451,6 @@ _.mixin({
 		    .value();
 	    }
 	});
-
 _.mixin({
 	    curry:function(fn) {
 		var args = _.chain(arguments).toArray().rest().value();
@@ -526,5 +468,59 @@ _.mixin({
 			    args[i] = arguments[arg++];
 		    return fn.apply(this, args);
 		};
+	    }
+	});
+_.mixin({
+	    parseBool:function(bool_str){
+		if(bool_str === 'true'){
+		    return true;
+		}
+		if(bool_str === 'false'){
+		    return false;
+		}
+		return false;
+	    }
+	})
+
+_.mixin({
+	    greater_than:function(a,b){
+		return a > b;
+	    },
+	    less_than:function(a,b){
+		return a < b;
+	    },
+	    greater_than_equal:function(a,b){
+		return a >= b;
+	    },
+	    less_than_equal:function(a,b){
+		return a <= b;
+	    },
+	    change_guard:function(val,transform,guard){
+		var transformated_val = transform(val);
+		if(guard(transformated_val)){
+		    return transformated_val;
+		}
+		return val;
+	    }
+	});
+
+_.mixin({
+	    inc:function(num,limit,magnitude){
+		if(!_.isNumber(num)){
+		    return num;
+		}
+		if(_.greater_than_equal(num,limit)){
+		    return limit;
+		}
+		return num + (magnitude || 1);
+	    },
+	    dec:function(num,limit,magnitude){
+		if(!_.isNumber(num)){
+		    return num;
+		}
+		if(_.less_than_equal(num,limit)){
+		    return limit;
+		}
+		return num - (magnitude || 1);
 	    }
 	});

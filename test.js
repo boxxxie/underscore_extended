@@ -329,6 +329,10 @@ matchTo(["1","2"],[{id:"1",a:2}],'id')
 
 //------------------ extend recursive -------------------
 
+extend_r({},1)
+(1)
+("primative to object overwrite");
+
 extend_r({},{a:1})
 ({a:1})
 ("non-recursive extend onto an empty object");
@@ -362,10 +366,12 @@ extend_r(
      _rev: "2-27c295b83271e6dcc2dc43df18444177",
      date: "Wed Jan 25 2012 22:24:01 GMT-0500 (EST)",
      price: {selling_price: 2},
+     arrayTest:[1],
      description: "invNeww",
      upccode: "01123456"},
     {_id: "02bb06f0fed1596decf2024a4c029a59",
      _rev: "5-484927d67a1be1454431b4143059c87c",
+     arrayTest:[2,3],
      date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)",
      description: "invNeww",
      apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true},
@@ -373,11 +379,80 @@ extend_r(
 ({_id: "02bb06f0fed1596decf2024a4c029a59",
   _rev: "5-484927d67a1be1454431b4143059c87c",
   date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)",
+  arrayTest:[2,3],
   description: "invNeww",
   price: {selling_price: 2},
   apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true},
   upccode: "01123456"})
 ("complex real world object filling in a missing field");
+
+extend_r([1,2,3],[4,5,6])
+([4,5,6])
+('extending onto arrays')
+
+extend_r([1,2,3],[4,5,6,7])
+([4,5,6,7])
+('extending onto arrays of different sizes')
+
+extend_r([1,2,3,4],[5,6,7])
+([5,6,7,4])
+('extending onto arrays of different sizes')
+
+extend_r([[1],[2]],[[4],[5]])
+([[4],[5]])
+('extending onto nested arrays')
+
+extend_r([[1],[2]],[[4],[5],[6]])
+([[4],[5],[6]])
+('extending onto nested arrays of different sizes')
+
+extend_r([[1],[2,3]],[[4],[5]])
+([[4],[5,3]])
+('extending onto nested arrays of different sizes')
+
+extend_r(
+    {"display":
+     {"description":["","",""],
+      "color":"255,255,25",
+      "is_enabled":false,
+      "screen":0,
+      "position":0
+     },
+     "foodItem":{"price":3.49,
+		 "has_modifier":true,
+		 "apply_taxes":{"exemption":true,
+				"tax1":true,
+				"tax2":true,
+				"tax3":false
+			       },
+		 "use_scale":false,
+		 "print_to_kitchen":true,
+		 "duplicate":false
+		}
+    },
+
+    {display:{color:"#fffff"}}
+)
+(
+    {"display":
+     {"description":["","",""],
+      "color":"#fffff",
+      "is_enabled":false,
+      "screen":0,
+      "position":0},
+     "foodItem":{"price":3.49,
+		 "has_modifier":true,
+		 "apply_taxes":{"exemption":true,
+				"tax1":true,
+				"tax2":true,
+				"tax3":false},
+		 "use_scale":false,
+		 "print_to_kitchen":true,
+		 "duplicate":false
+     }
+    })
+("real data merging complicated objects with arrays and uneven nested properties")
+
 
 //-----------------------fill -------------------------------
 
@@ -495,6 +570,49 @@ combine({a:1},{a:2},{a:3})
 combine({a:1},{a:2},{a:3,b:3})
 ({a:3,b:3})
 ("conflict keys overwrite with the last. 3 args");
+
+combine(
+    {"display":
+     {"description":["","",""],
+      "color":"255,255,25",
+      "is_enabled":false,
+      "screen":0,
+      "position":0
+     },
+     "foodItem":{"price":3.49,
+		 "has_modifier":true,
+		 "apply_taxes":{"exemption":true,
+				"tax1":true,
+				"tax2":true,
+				"tax3":false
+			       },
+		 "use_scale":false,
+		 "print_to_kitchen":true,
+		 "duplicate":false
+		}
+    },
+
+    {display:{color:"#fffff"}}
+)
+(
+    {"display":
+     {"description":["","",""],
+      "color":"#fffff",
+      "is_enabled":false,
+      "screen":0,
+      "position":0},
+     "foodItem":{"price":3.49,
+		 "has_modifier":true,
+		 "apply_taxes":{"exemption":true,
+				"tax1":true,
+				"tax2":true,
+				"tax3":false},
+		 "use_scale":false,
+		 "print_to_kitchen":true,
+		 "duplicate":false
+     }
+    })
+("real data merging complicated objects with arrays and uneven nested properties")
 
 combine({a:{b:1}},{a:{b:2}},{a:{b:3},b:3})
 ({a:{b:3},b:3})
