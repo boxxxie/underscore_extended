@@ -478,7 +478,7 @@ _.mixin({
 		if(bool_str === 'false'){
 		    return false;
 		}
-		return false;
+		return bool_str;
 	    }
 	})
 
