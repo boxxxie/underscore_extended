@@ -438,6 +438,8 @@ _.mixin({
 	    splitKeys:_.juxtapose(_.selectKeys,_.removeKeys)
 	});
 
+//this is really cool. check out clojure's documentation for how the
+//output looks
 _.mixin({
 	    //returns a frequencies object based on the list/iterator
 	    frequencies:function(list,iterator){
@@ -451,6 +453,7 @@ _.mixin({
 		    .value();
 	    }
 	});
+
 _.mixin({
 	    curry:function(fn) {
 		var args = _.chain(arguments).toArray().rest().value();
@@ -470,6 +473,7 @@ _.mixin({
 		};
 	    }
 	});
+
 _.mixin({
 	    parseBool:function(bool_str){
 		if(bool_str === 'true'){
@@ -504,6 +508,8 @@ _.mixin({
 	    }
 	});
 
+//these are inc and dec functions with guards. useful when you don't
+//want to dec past 0 or some other magic number
 _.mixin({
 	    inc:function(num,limit,magnitude){
 		if(!_.isNumber(num)){
