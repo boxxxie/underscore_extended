@@ -1,30 +1,108 @@
 var _ = require("underscore");
 require("../underscore_extended");
+//var mocha = require('mocha')();
+//var should = require('should');
+var prettyjson = require('prettyjson');
+var assert = require('assert');
 var chai = require('chai');
+
 var expect = chai.expect;
 
+//var describe = mocha.Suite;
+//var it = mocha.Test;
+
 function _test(fnName){
-    return function(){
-	var input = arguments;
-	return function(output){
-	    return function(testText){
-		var result = _[fnName].apply(null,input);
-		if(_.isEqual(result,output)){
-		    console.log("Passed: " + fnName + ": " + testText);
-		}
-		else{
-		    console.log("Failed: " + fnName + ": " + testText);
-		    console.log("input");
-		    console.log(input);
-		    console.log("expected output:");
-		    console.log(output);
-		    console.log("returned:");
-		    console.log(result);
-		}
-	    };
-	};
+  return function(){
+    var input = arguments;
+    return function(output){
+      return function(testText){
+	var result = _[fnName].apply(null,input);
+	if(_.isEqual(result,output)){
+	  console.log("Passed: " + fnName + ": " + testText);
+	}
+	else{
+	  console.log("Failed: " + fnName + ": " + testText);
+	  console.log("input");
+	  console.log(input);
+	  console.log("expected output:");
+	  console.log(output);
+	  console.log("returned:");
+	  console.log(result);
+	}
+      };
     };
+  };
 };
+
+
+/**
+ * A better way to compare two objects in Javascript
+ **/
+function getKeys(obj) {
+  var keys;
+  if(obj.keys) {
+    keys = obj.keys();
+  } else {
+    keys = [];
+
+    for(var k in obj) {
+      if(Object.prototype.hasOwnProperty.call(obj, k)) {
+        keys.push(k);
+      }
+    }
+  }
+
+  return keys;
+}
+
+/**
+ * Create a new object so the keys appear in the provided order.
+ * @param {Object} obj The object to be the base for the new object
+ * @param {Array} keys The order in which properties of the new object should appear
+ **/
+function reconstructObject(obj, keys) {
+  var result = {};
+  for (var i = 0, l = keys.length; i < l; i++) {
+    if (Object.prototype.hasOwnProperty.call(obj, keys[i])) {
+      result[keys[i]] = obj[keys[i]];
+    }
+  }
+
+  return result;
+}
+
+function assertEquals(obj1,obj2,msg){
+  assert.equal(
+    prettyjson.render(obj1), 
+    prettyjson.render(obj2),
+    msg);
+}
+
+function assertObjectEqual(a, b, msg) {
+  msg = msg || '';
+  if( Object.prototype.toString.call( a ) === '[object Array]' && Object.prototype.toString.call( b ) === '[object Array]') {
+    // special case: array of objects
+    if (a.filter(function(e) { return Object.prototype.toString.call( e ) === '[object Object]' }).length > 0 ||
+        b.filter(function(e) { return Object.prototype.toString.call( e ) === '[object Object]' }).length > 0 ){
+
+      if (a.length !== b.length) {
+        assertEquals(a,b,msg);
+      } else {
+        for(var i = 0, l = a.length; i < l; i++) {
+          assertObjectEqual(a[i], b[i], msg + '[elements at index ' + i + ' should be equal]');
+        }
+      }
+      // simple array of primitives
+    } else {
+      assertEquals(a,b,msg);
+    }
+  } else {
+    var orderedA = reconstructObject(a, getKeys(a).sort()),
+    orderedB = reconstructObject(b, getKeys(b).sort());
+    // compare as strings for diff tolls to show us the difference
+    assertEquals(orderedA,orderedB,msg);
+  }
+}
 
 var //pairs = _test("pairs"),
 toObject = _test("toObject"),
@@ -46,7 +124,7 @@ map$ = _test("map$"),
 compress = _test("compress"),
 joinOn = _test("joinOn"),
 matchTo = _test("matchTo"),
-extend_r = _test("extend_r"),
+//extend_r = _test("extend_r"),
 fill = _test("fill"),
 either = _test("either"),
 combine = _test("combine"),
@@ -72,26 +150,31 @@ describe('_.pairs()', function(){
   it("should convert {a:'a',b:['c','b']} into [['a','a'],['b',['c','b']]]",function(){
     expect(
       _.pairs({a:'a',b:['c','b']}))
-    .eql([['a','a'],['b',['c','b']]])
+      .eql([['a','a'],['b',['c','b']]])
   })
 })
 
+describe("_.toObject()",function(){
+  it("should convert ([['a','a'],['b','b']]) into {a:'a',b:'b'}",function(){
+    expect(_.toObject([['a','a'],['b','b']]))
+      .eql({a:'a',b:'b'})
+  });
+  it("should convert   ([['a','a'],['b',{a:'b'}]]) into {a:'a',b:{a:'b'}}",function(){
+    expect(_.toObject([['a','a'],['b',{a:'b'}]]))
+      .eql({a:'a',b:{a:'b'}});
+  });
+});
 
-toObject([['a','a'],['b','b']])
-({a:'a',b:'b'})
-("with an array rep of a simple object");
-
-toObject([['a','a'],['b',{a:'b'}]])
-({a:'a',b:{a:'b'}})
-("with an array rep of a complex object");
-
-selectKeys({"a":'a',"b":'b'},['a'])
-({a:'a'})
-("selected 1 key from a 2 key obj");
-
-selectKeys({"a":'a',"b":'b'},['c'])
-({})
-("selected from an obj that doesn't have them");
+describe("_.selectKeys()",function(){
+  it("should convert ({'a':'a','b':'b'},['a']) into {a:'a'}",function(){
+    expect(_.selectKeys({"a":'a',"b":'b'},['a']))
+      .eql({a:'a'});
+  });
+  it("should convert selectKeys({'a':'a','b':'b'},['c']) into {}",function(){
+    expect(_.selectKeys({"a":'a',"b":'b'},['c']))
+      .eql({})
+  });
+});
 
 selectKeys({a:'a',b:'b',c:4},['c'])
 ({c:4})
@@ -166,7 +249,7 @@ isLastEmpty([1,1,1,undefined])
 (true)
 ("with last el being undefined");
 
-describe("_.renameKeys",function(){
+describe("_.renameKeys()",function(){
   it("should convert ({a:'b',c:'d'},{a:'ba'}) into {ba:'b',c:'d'}", function(){
     expect(_.renameKeys({a:'b',c:'d'},{a:'ba'}))
       .eql({ba:'b',c:'d'})
@@ -229,13 +312,13 @@ merge([{a:1},{b:2},{c:3}])
 ("all objs in array have have different keys");
 
 mapMerge([
-	     [{a:1},{b:2},{c:3}],
-	     [{a:1},{a:2},{a:3}]
-	 ])
+  [{a:1},{b:2},{c:3}],
+  [{a:1},{a:2},{a:3}]
+])
 ([
-     {a:1,b:2,c:3},
-     {a:3}
- ])
+  {a:1,b:2,c:3},
+  {a:3}
+])
 ("previous merge input and output but in a list together");
 
 zipMerge([{b:2}],[{a:1}])
@@ -345,7 +428,7 @@ matchTo(["1","2"],[{id:"1",a:2}],'id')
 ("matching string array with obj array [2][1], matches");
 
 //------------------ extend recursive -------------------
-
+/*
 extend_r({},1)
 (1)
 ("primative to object overwrite");
@@ -379,20 +462,20 @@ extend_r({c:0},{a:{b:1}})
 ("recursive extend onto a non-empty objet, leaving 1 field unchanged and adding a new top-level field");
 
 extend_r(
-    {_id: "02bb06f0fed1596decf2024a4c025997",
-     _rev: "2-27c295b83271e6dcc2dc43df18444177",
-     date: "Wed Jan 25 2012 22:24:01 GMT-0500 (EST)",
-     price: {selling_price: 2},
-     arrayTest:[1],
-     description: "invNeww",
-     upccode: "01123456"},
-    {_id: "02bb06f0fed1596decf2024a4c029a59",
-     _rev: "5-484927d67a1be1454431b4143059c87c",
-     arrayTest:[2,3],
-     date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)",
-     description: "invNeww",
-     apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true},
-     upccode: "01123456"})
+  {_id: "02bb06f0fed1596decf2024a4c025997",
+   _rev: "2-27c295b83271e6dcc2dc43df18444177",
+   date: "Wed Jan 25 2012 22:24:01 GMT-0500 (EST)",
+   price: {selling_price: 2},
+   arrayTest:[1],
+   description: "invNeww",
+   upccode: "01123456"},
+  {_id: "02bb06f0fed1596decf2024a4c029a59",
+   _rev: "5-484927d67a1be1454431b4143059c87c",
+   arrayTest:[2,3],
+   date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)",
+   description: "invNeww",
+   apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true},
+   upccode: "01123456"})
 ({_id: "02bb06f0fed1596decf2024a4c029a59",
   _rev: "5-484927d67a1be1454431b4143059c87c",
   date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)",
@@ -428,49 +511,49 @@ extend_r([[1],[2,3]],[[4],[5]])
 ('extending onto nested arrays of different sizes')
 
 extend_r(
-    {"display":
-     {"description":["","",""],
-      "color":"255,255,25",
-      "is_enabled":false,
-      "screen":0,
-      "position":0
-     },
-     "foodItem":{"price":3.49,
-		 "has_modifier":true,
-		 "apply_taxes":{"exemption":true,
-				"tax1":true,
-				"tax2":true,
-				"tax3":false
-			       },
-		 "use_scale":false,
-		 "print_to_kitchen":true,
-		 "duplicate":false
-		}
-    },
+  {"display":
+   {"description":["","",""],
+    "color":"255,255,25",
+    "is_enabled":false,
+    "screen":0,
+    "position":0
+   },
+   "foodItem":{"price":3.49,
+	       "has_modifier":true,
+	       "apply_taxes":{"exemption":true,
+			      "tax1":true,
+			      "tax2":true,
+			      "tax3":false
+			     },
+	       "use_scale":false,
+	       "print_to_kitchen":true,
+	       "duplicate":false
+	      }
+  },
 
-    {display:{color:"#fffff"}}
+  {display:{color:"#fffff"}}
 )
 (
-    {"display":
-     {"description":["","",""],
-      "color":"#fffff",
-      "is_enabled":false,
-      "screen":0,
-      "position":0},
-     "foodItem":{"price":3.49,
-		 "has_modifier":true,
-		 "apply_taxes":{"exemption":true,
-				"tax1":true,
-				"tax2":true,
-				"tax3":false},
-		 "use_scale":false,
-		 "print_to_kitchen":true,
-		 "duplicate":false
-     }
-    })
+  {"display":
+   {"description":["","",""],
+    "color":"#fffff",
+    "is_enabled":false,
+    "screen":0,
+    "position":0},
+   "foodItem":{"price":3.49,
+	       "has_modifier":true,
+	       "apply_taxes":{"exemption":true,
+			      "tax1":true,
+			      "tax2":true,
+			      "tax3":false},
+	       "use_scale":false,
+	       "print_to_kitchen":true,
+	       "duplicate":false
+              }
+  })
 ("real data merging complicated objects with arrays and uneven nested properties")
 
-
+*/
 //-----------------------fill -------------------------------
 
 fill({},{a:1})
@@ -503,18 +586,18 @@ fill({a:{b:1}},{a:{b:2,c:3}})
 
 
 fill(
-    {_id: "02bb06f0fed1596decf2024a4c029a59",
-     _rev: "5-484927d67a1be1454431b4143059c87c",
-     date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)",
-     description: "invNeww",
-     apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true},
-     upccode: "01123456"},
-    {_id: "02bb06f0fed1596decf2024a4c025997",
-     _rev: "2-27c295b83271e6dcc2dc43df18444177",
-     date: "Wed Jan 25 2012 22:24:01 GMT-0500 (EST)",
-     price: {selling_price: 2},
-     description: "invNeww",
-     upccode: "01123456"})
+  {_id: "02bb06f0fed1596decf2024a4c029a59",
+   _rev: "5-484927d67a1be1454431b4143059c87c",
+   date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)",
+   description: "invNeww",
+   apply_taxes: {exemption: false, tax1: true, tax2: true, tax3: true},
+   upccode: "01123456"},
+  {_id: "02bb06f0fed1596decf2024a4c025997",
+   _rev: "2-27c295b83271e6dcc2dc43df18444177",
+   date: "Wed Jan 25 2012 22:24:01 GMT-0500 (EST)",
+   price: {selling_price: 2},
+   description: "invNeww",
+   upccode: "01123456"})
 ({_id: "02bb06f0fed1596decf2024a4c029a59",
   _rev: "5-484927d67a1be1454431b4143059c87c",
   date: "Wed Jan 25 2012 22:25:09 GMT-0500 (EST)",
@@ -545,95 +628,81 @@ either(3, 1)
 //------------------- expand ---------------------------
 
 /*
- expand({},'abc')
- ({})
- ("expanding on an empty obj results in an empty list");
+  expand({},'abc')
+  ({})
+  ("expanding on an empty obj results in an empty list");
 
- expand({a:1},'a')
- ({a:1})
- ("expanding on a simple obj results in the same object");
+  expand({a:1},'a')
+  ({a:1})
+  ("expanding on a simple obj results in the same object");
 
- expand({a:{b:1}},'a')
- ({b:1})
- ("expanding on a nested obj results in the field being replaced");
+  expand({a:{b:1}},'a')
+  ({b:1})
+  ("expanding on a nested obj results in the field being replaced");
 
- expand({a:{b:1},c:{e:2}},'a','c')
- ({b:1,e:2})
- ("expanding on a complex obj results in the selected fields being replaced");
+  expand({a:{b:1},c:{e:2}},'a','c')
+  ({b:1,e:2})
+  ("expanding on a complex obj results in the selected fields being replaced");
 
- expand({a:{b:1},c:{b:2}},'a','c')
- ({b:2})
- ("conflict keys results in the last values overwritting the first");
- */
+  expand({a:{b:1},c:{b:2}},'a','c')
+  ({b:2})
+  ("conflict keys results in the last values overwritting the first");
+*/
 
 
-//---------------------------------- combine ------------------------------------
-combine({},{})
-({})
-("2 empty objects creates an empty object");
+//---------------------------------- combine
+//---------------------------------- ------------------------------------
 
-combine({a:1},{b:2})
-({a:1,b:2})
-("2 simple objects creates another simple object");
+describe("_.combine()",function(){
+  it("should merge two empty objects into an empty object",function(){
+    expect(_.combine({},{}))
+      .eql({});         
+  }); 
+  it("should merge 2 simple objects (with no conflicting keys) into an object with both keys and values preserved",function(){
+    expect(_.combine({a:1},{b:2}))
+      .eql({a:1,b:2});
+  });
+  it("should merge n objects (with conflicting keys) into an object with the last key value given preserved",function(){
+    expect(_.combine({a:1},{a:3},{a:2}))
+      .eql({a:2})
+  });
+  it("should merge n objects (with conflicting keys) into an object with the last key value given preserved, as well as non-conflicting keys preserved",function(){
+    expect(_.combine({a:1},{a:2},{a:3,b:3}))
+      .eql({a:3,b:3})
+  });
+  it("should recursively merge keys/values of the objects given",function(){
+    expect(_.combine({a:{b:1}},{a:{b:2}},{a:{b:3},b:3}))
+      .eql({a:{b:3},b:3});
+  });
+  it("should handle very complicated objects", function(){
+    var base_obj = {"display":
+                {"description":["","",""],
+                 "is_enabled":false,
+                 "screen":0,
+                 "position":0
+                },
+                "foodItem":{"price":3.49,
+		            "has_modifier":true,
+		            "apply_taxes":{"exemption":true,
+				           "tax1":true,
+				           "tax2":true,
+				           "tax3":false
+			                  },
+		            "use_scale":false,
+		            "print_to_kitchen":true,
+		            "duplicate":false
+		           }
+               };
+    var obj1 = _.clone(base_obj); obj1.display.color ="255,255,25";
+    var obj2 = _.clone(base_obj); obj2.display.color = "#fffff";
+    var expected_merge = _.clone(base_obj); expected_merge.display.color = "#fffff";
+    
+    expect(_.combine(obj1,obj2)).eql(expected_merge);
+  });
+});
 
-combine({a:1},{a:2})
-({a:2})
-("conflict keys overwrite with the last");
 
-combine({a:1},{a:2},{a:3})
-({a:3})
-("conflict keys overwrite with the last. 3 args");
 
-combine({a:1},{a:2},{a:3,b:3})
-({a:3,b:3})
-("conflict keys overwrite with the last. 3 args");
-
-combine(
-    {"display":
-     {"description":["","",""],
-      "color":"255,255,25",
-      "is_enabled":false,
-      "screen":0,
-      "position":0
-     },
-     "foodItem":{"price":3.49,
-		 "has_modifier":true,
-		 "apply_taxes":{"exemption":true,
-				"tax1":true,
-				"tax2":true,
-				"tax3":false
-			       },
-		 "use_scale":false,
-		 "print_to_kitchen":true,
-		 "duplicate":false
-		}
-    },
-
-    {display:{color:"#fffff"}}
-)
-(
-    {"display":
-     {"description":["","",""],
-      "color":"#fffff",
-      "is_enabled":false,
-      "screen":0,
-      "position":0},
-     "foodItem":{"price":3.49,
-		 "has_modifier":true,
-		 "apply_taxes":{"exemption":true,
-				"tax1":true,
-				"tax2":true,
-				"tax3":false},
-		 "use_scale":false,
-		 "print_to_kitchen":true,
-		 "duplicate":false
-     }
-    })
-("real data merging complicated objects with arrays and uneven nested properties")
-
-combine({a:{b:1}},{a:{b:2}},{a:{b:3},b:3})
-({a:{b:3},b:3})
-("recursive merge keys overwrite with the last. 3 args");
 
 mapCombine([{a:1},{a:1}],{a:1})
 ([{a:1},{a:1}])
@@ -667,4 +736,3 @@ subtract({a:1,b:{b:2}},{b:{b:1}})
 ({a:1,b:{b:1}})
 ("subtracting a nested object");
 
-console.log("tests finished");

@@ -13,11 +13,14 @@
   },
   "devDependencies": {
     "mocha":"1.5.x",
-    "chai":"1.2.x"
+    "should":"1.2.x",
+    "chai":"1.2.x",
+    "prettyjson":"*"
   },
   "keywords": [
     "functional",
     "fp",
     "underscore"
-  ]
+  ],
+  "main":"underscore_extended.js"
 }

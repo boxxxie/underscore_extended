@@ -371,23 +371,7 @@
     });
 
     _.mixin({
-      //depricated, use combine
-      extend_r:function(extendTo,extendFrom){
-        function isObject(obj) {
-	  return obj === Object(obj) && !(obj instanceof Array);
-        };
-        function mergeRecursive(extendTo, extendFrom) {
-	  for (var p in extendFrom) {
-	    if (isObject(extendFrom[p])) {
-	      extendTo[p] = mergeRecursive({}, extendFrom[p]);
-	    } else {
-	      extendTo[p] = extendFrom[p];
-	    }
-	  }
-	  return extendTo;
-        }
-        return mergeRecursive(extendTo, extendFrom);
-      },
+      
       fill:function(fillIn,fillFrom){
         function isObject(obj) {
 	  return obj === Object(obj) && !(obj instanceof Array);
@@ -416,9 +400,25 @@
       //supposed to be a safe _.extend that is recursive and takes in v-args
       //use inplace of extend_r
       combine:function(){
+        function extend_r(extendTo,extendFrom){
+          function isObject(obj) {
+	    return obj === Object(obj) && !(obj instanceof Array);
+          };
+          function mergeRecursive(extendTo, extendFrom) {
+	    for (var p in extendFrom) {
+	      if (isObject(extendFrom[p])) {
+	        extendTo[p] = mergeRecursive({}, extendFrom[p]);
+	      } else {
+	        extendTo[p] = extendFrom[p];
+	      }
+	    }
+	    return extendTo;
+          }
+          return mergeRecursive(extendTo, extendFrom);
+        }
         return _.reduce(_(arguments).toArray(),
 		        function(returnItem,curItem){
-			  return _.extend_r(returnItem,curItem);
+			  return extend_r(returnItem,curItem);
 		        },{});
       }
     });
