@@ -40,15 +40,15 @@
       }
     });
 
-    _.mixin({
-      /* Retrieve the keys and values of an object's properties.
-         {a:'a',b:'b'} -> [[a,'a'],[b,'b']]
-      */
+    /*_.mixin({
+      // Retrieve the keys and values of an object's properties.
+      //   {a:'a',b:'b'} -> [[a,'a'],[b,'b']]
+      
       pairs:function (obj) {
         return _.map(obj,function(val,key){
 	  return [key,val];
         });
-      }});
+      }});*/
 
     _.mixin({
       /*converts an array of pairs into an objcet
