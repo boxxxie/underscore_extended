@@ -19,8 +19,5 @@
     "functional",
     "fp",
     "underscore"
-  ],
-  "scripts": {
-    "test": "mocha -u bdd -r expect --reporter list --growl"
-  }
+  ]
 }
