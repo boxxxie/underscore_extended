@@ -5,60 +5,60 @@ Adds these helpful functions to underscore, and a few more that should be docume
 
 Utility
 -------
-pairs
-toObject
-unEscape
-isNotEmpty
+- pairs
+- toObject
+- unEscape
+- isNotEmpty
 
 Object mapping/splitting
 ------------------------
-selectKeys
-removeKeys
-renameKeys
-nest
-splitKeys
+- selectKeys
+- removeKeys
+- renameKeys
+- nest
+- splitKeys
 
 Object Merging
 --------------
-combine
-extend_r
-fill
+- combine
+- extend_r
+- fill
 
 Array
 -----
-isLastEmpty
-merge
-zipMerge
-partition
-compress
-joinOn
-matchTo
+- isLastEmpty
+- merge
+- zipMerge
+- partition
+- compress
+- joinOn
+- matchTo
 
 Map
 ---
-mapRenameKeys
-mapMerge
-mapNest
-mapCombine
+- mapRenameKeys
+- mapMerge
+- mapNest
+- mapCombine
 
 Object/Array unification
 ------------------------
-filter$
-map$
+- filter$
+- map$
 
 Functions
 ---------
-juxtapose
+- juxtapose
 
 Object/Primative unification
 ----------------------------
-add
-subtract
-multiply
-divide
-lessThan
-greaterThan
+- add
+- subtract
+- multiply
+- divide
+- lessThan
+- greaterThan
 
 Conditional
 -----------
-either
+- either
