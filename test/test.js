@@ -1,9 +1,7 @@
 var _ = require("underscore");
 require("../underscore_extended");
-var mocha = require('mocha');
-var chai = require('chai')
-//  , chaiModel = require('./helpers/model')
-  , expect = chai.expect;
+var chai = require('chai');
+var expect = chai.expect;
 
 function _test(fnName){
     return function(){
@@ -61,21 +59,19 @@ subtract = _test("subtract"),
 multiply = _test("multiply"),
 divide = _test("divide");
 
-describe('pairs()',function(){
+describe('pairs()', function(){
   it("should convert {a:'a',b:'b'} into [['a','a'],['b','b']]",function(){
     expect(
       _.pairs({a:'a',b:'b'}))
       .eql([['a','a'],['b','b']]);
   })
+  it("should convert {a:'a',b:{c:'b'}} to [['a','a'],['b',{c:'b'}]]",function(){
+    expect(
+      _.pairs({a:'a',b:{c:'b'}}))
+      .eql([['a','a'],['b',{c:'b'}]])
+  })
 })
 
-pairs({a:'a',b:'b'})
-([['a','a'],['b','b']])
-("test with a simple object");
-
-pairs({a:'a',b:{c:'b'}})
-([['a','a'],['b',{c:'b'}]])
-("test with a nested object");
 
 pairs({a:'a',b:['c','b']})
 ([['a','a'],['b',['c','b']]])
