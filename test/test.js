@@ -26,14 +26,14 @@ function _test(fnName){
     };
 };
 
-var pairs = _test("pairs"),
+var //pairs = _test("pairs"),
 toObject = _test("toObject"),
 selectKeys = _test("selectKeys"),
 removeKeys = _test("removeKeys"),
 unEscape = _test("unEscape"),
 isNotEmpty = _test("isNotEmpty"),
 isLastEmpty = _test("isLastEmpty"),
-renameKeys = _test("renameKeys"),
+//renameKeys = _test("renameKeys"),
 mapRenameKeys = _test("mapRenameKeys"),
 merge = _test("merge"),
 mapMerge = _test("mapMerge"),
@@ -59,23 +59,24 @@ subtract = _test("subtract"),
 multiply = _test("multiply"),
 divide = _test("divide");
 
-describe('pairs()', function(){
+describe('_.pairs()', function(){
   it("should convert {a:'a',b:'b'} into [['a','a'],['b','b']]",function(){
     expect(
       _.pairs({a:'a',b:'b'}))
       .eql([['a','a'],['b','b']]);
   })
-  it("should convert {a:'a',b:{c:'b'}} to [['a','a'],['b',{c:'b'}]]",function(){
+  it("should convert {a:'a',b:{c:'b'}} into [['a','a'],['b',{c:'b'}]]",function(){
     expect(
       _.pairs({a:'a',b:{c:'b'}}))
       .eql([['a','a'],['b',{c:'b'}]])
   })
+  it("should convert {a:'a',b:['c','b']} into [['a','a'],['b',['c','b']]]",function(){
+    expect(
+      _.pairs({a:'a',b:['c','b']}))
+    .eql([['a','a'],['b',['c','b']]])
+  })
 })
 
-
-pairs({a:'a',b:['c','b']})
-([['a','a'],['b',['c','b']]])
-("test with a nested object with an array in it");
 
 toObject([['a','a'],['b','b']])
 ({a:'a',b:'b'})
@@ -166,25 +167,34 @@ isLastEmpty([1,1,1,undefined])
 (true)
 ("with last el being undefined");
 
-renameKeys({a:'b',c:'d'},{a:'ba'})
-({ba:'b',c:'d'})
-("rename keys in simple obj");
+describe("_.renameKeys",function(){
+  it("should convert ({a:'b',c:'d'},{a:'ba'}) into {ba:'b',c:'d'}", function(){
+    expect(_.renameKeys({a:'b',c:'d'},{a:'ba'}))
+      .eql({ba:'b',c:'d'})
+  });
+  
+  it("should convert ({a:'b',c:'d'},{a:'c', c:'a'}) into {c:'b',a:'d'}",function(){
+    expect(_.renameKeys({a:'b',c:'d'},{a:'c', c:'a'}))
+      .eql({c:'b',a:'d'})
+  });
 
-renameKeys({a:'b',c:'d'},{a:'c', c:'a'})
-({c:'b',a:'d'})
-("swapping key names!");
 
-renameKeys({a:'b',c:'d'},['a','c','c','a'])
-({c:'b',a:'d'})
-("swapping key names! but with an array as the keymap input");
+  it("should convert  ({a:'b',c:'d'},['a','c','c','a']) into  {c:'b',a:'d'}",function(){
+    expect(_.renameKeys({a:'b',c:'d'},['a','c','c','a']))
+      .eql({c:'b',a:'d'})
+  })
+  
+  it("should convert ({a:'b',c:'d'},'a','c','c','a') into {c:'b',a:'d'}", function(){
+    expect(_.renameKeys({a:'b',c:'d'},'a','c','c','a'))
+      .eql({c:'b',a:'d'})
+  });
 
-renameKeys({a:'b',c:'d'},'a','c','c','a')
-({c:'b',a:'d'})
-("swapping key names! but with an array as the keymap input");
+  it("should convert ({a:'b',c:'d'},[['a','c'],['c','a']]) into {c:'b',a:'d'}",function(){
+    expect(_.renameKeys({a:'b',c:'d'},[['a','c'],['c','a']]))
+      .eql({c:'b',a:'d'})
+  });
+});
 
-renameKeys({a:'b',c:'d'},[['a','c'],['c','a']])
-({c:'b',a:'d'})
-("swapping key names! but with a pair array as the keymap input");
 
 //----------------------------------------------map rename
 
