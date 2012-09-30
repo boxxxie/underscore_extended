@@ -66,11 +66,12 @@
       /*create an object with only the keys in the selected keys array arg
        * ({a:'a',b:'b'},['a']) -> {a:'a'}
        */
-      selectKeys:function (obj){
+      selectKeys:_.pick,
+      /*selectKeys:function (obj){
         //do flatten because of older array notation, in which we can get an array in an array.
         var keys = _.flatten(_.rest(arguments));
         return  _.filter$(obj,function(val,key){return _.contains(keys,key);});
-      },
+      },*/
 
       /*create an object without the keys in the selected keys array arg
        * ({a:'a',b:'b'},['a']) -> {b:'b'}
