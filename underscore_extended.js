@@ -121,11 +121,6 @@
 	     }
 	    });
 
-    _.mixin({
-      second:function (list){
-        return _.first(_.rest(list));
-      }
-    });
     _.mixin({renameKeys:function (obj_for_key_renaming){
       var args = _.rest(arguments);
       var fieldMap = _.first(args);
@@ -238,12 +233,15 @@
     });
 
     _.mixin({
-      log:function(logText){
+      log:function(namespace){
         return function(obj){
-	  console.log(logText);
-	  console.log(obj);
-	  return obj;
+	  console.log(logText,obj);
         };
+      },
+      log_args:function(namespace){
+        return function(){
+          console.log(namespace,arguments);
+        }
       }
     });
 
