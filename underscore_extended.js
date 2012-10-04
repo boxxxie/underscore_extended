@@ -3,11 +3,11 @@
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
       // Export module
-      var _ = require('underscore');
-      add_underscore_mixins(_);
-      module.exports = _;
+      var u = require('underscore');
+      add_underscore_mixins(u);
+      module.exports = u;
     }
-    exports._ = _;
+    exports._ = u;
 
   } else if (typeof define === 'function' && define.amd) {
     // Register as a named module with AMD.
