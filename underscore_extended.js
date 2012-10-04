@@ -1,16 +1,27 @@
 (function(){
-  if(require){
-    var _ = require('underscore');
-    add_underscore_mixins();
-  }
-  else if(_){
-    add_underscore_mixins();
+  // CommonJS module is defined
+  if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      // Export module
+      var _ = require('underscore');
+      add_underscore_mixins(_);
+      module.exports = _;
+    }
+    exports._ = _;
+
+  } else if (typeof define === 'function' && define.amd) {
+    // Register as a named module with AMD.
+    define('underscore_extended', [], function() {
+      return _;
+    });
+  } else if(_){
+    add_underscore_mixins(_);
   }
   else{
     throw 'Underscore.js not found, please include it';
   }
 
-  function add_underscore_mixins(){
+  function add_underscore_mixins(_){
     _.mixin({
       /*
        * this is a generic helper function that will allow you to take any function that is applied to
@@ -41,14 +52,14 @@
     });
 
     /*_.mixin({
-      // Retrieve the keys and values of an object's properties.
-      //   {a:'a',b:'b'} -> [[a,'a'],[b,'b']]
-      
-      pairs:function (obj) {
-        return _.map(obj,function(val,key){
-	  return [key,val];
-        });
-      }});*/
+    // Retrieve the keys and values of an object's properties.
+    //   {a:'a',b:'b'} -> [[a,'a'],[b,'b']]
+    
+    pairs:function (obj) {
+    return _.map(obj,function(val,key){
+    return [key,val];
+    });
+    }});*/
 
     _.mixin({
       /*converts an array of pairs into an objcet
@@ -68,21 +79,21 @@
        */
       selectKeys:_.pick,
       /*selectKeys:function (obj){
-        //do flatten because of older array notation, in which we can get an array in an array.
-        var keys = _.flatten(_.rest(arguments));
-        return  _.filter$(obj,function(val,key){return _.contains(keys,key);});
+      //do flatten because of older array notation, in which we can get an array in an array.
+      var keys = _.flatten(_.rest(arguments));
+      return  _.filter$(obj,function(val,key){return _.contains(keys,key);});
       },*/
 
       /*create an object without the keys in the selected keys array arg
        * ({a:'a',b:'b'},['a']) -> {b:'b'}
        */
       removeKeys:_.omit,
-/*
-      removeKeys:function (obj){
+      /*
+        removeKeys:function (obj){
         //do flatten because of older array notation, in which we can get an array in an array.
         var keys = _.flatten(_.rest(arguments));
         return _.filter$(obj,function(val,key){return !_.contains(keys,key);});
-      }*/
+        }*/
     });
 
     // unEscape a string for HTML interpolation.
@@ -96,30 +107,32 @@
 	  .replace(/&#x27;/g,  "'")
 	  .replace(/&#x2F;/g,  '\/')
 	  .replace(/&amp;/g,   '&');
-      }});
+      }
+    });
 
-    _.mixin({isNotEmpty:function (obj){
-      return !_.isEmpty(obj);
-    },
-	     isLastEmpty:function (array){
-	       return _.isEmpty(_.last(array));
-	     },
-	     isFirstEmpty:function (array){
-	       return _.isEmpty(_.first(array));
-	     },
-	     isFirstNotEmpty:function (array){
-	       return !_.isEmpty(_.first(array));
-	     },
-	     isLastNotEmpty:function (array){
-	       return !_.isEmpty(_.last(array));
-	     },
-	     second:function (array){
-	       return _.first(_.rest(array));
-	     },
-	     isDefined:function(obj){
-	       return !_.isUndefined(obj);
-	     }
-	    });
+    _.mixin({
+      isNotEmpty:function (obj){
+        return !_.isEmpty(obj);
+      },
+      isLastEmpty:function (array){
+	return _.isEmpty(_.last(array));
+      },
+      isFirstEmpty:function (array){
+	return _.isEmpty(_.first(array));
+      },
+      isFirstNotEmpty:function (array){
+	return !_.isEmpty(_.first(array));
+      },
+      isLastNotEmpty:function (array){
+	return !_.isEmpty(_.last(array));
+      },
+      second:function (array){
+	return _.first(_.rest(array));
+      },
+      isDefined:function(obj){
+	return !_.isUndefined(obj);
+      }
+    });
 
     _.mixin({renameKeys:function (obj_for_key_renaming){
       var args = _.rest(arguments);
@@ -543,4 +556,6 @@
       }
     });
   }
+
+
 })();
