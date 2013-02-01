@@ -500,6 +500,7 @@
     });
 
     _.mixin({
+    	parseDec:function(num_str){return parseInt(num_str,10);},
       parseBool:function(bool_str){
         if(bool_str === 'true'){
 	  return true;
